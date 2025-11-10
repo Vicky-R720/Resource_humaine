@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Publier une offre</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Navbar fixe en haut */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            height: 56px;
+        }
+
+        /* Sidebar fixe avec décalage pour la navbar */
+        .admin-sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: fixed;
+            width: 16.666667%;
+            top: 56px;
+            left: 0;
+            z-index: 1020;
+            overflow-y: auto;
+        }
+
+        /* Contenu principal avec décalage pour navbar et sidebar */
+        .main-content {
+            margin-left: 16.666667%;
+            margin-top: 56px;
+            width: 83.333333%;
+            min-height: calc(100vh - 56px);
+        }
+
+        /* Ajustement pour que le body n'ait pas de margin par défaut */
+        body {
+            padding-top: 0;
+        }
+
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+        }
+
+        .job-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            cursor: pointer;
+        }
+
+        /* Responsive pour petits écrans */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 100%;
+                position: static;
+                min-height: auto;
+                top: auto;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                margin-top: 56px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar fixe -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" th:href="@{/offers}">
+                <i class="fas fa-briefcase me-2"></i>BeerBears - Admin
+            </a>
+            <a th:href="@{/offers}" class="btn btn-outline-light">
+                <i class="fas fa-home me-1"></i>Retour au site
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- Sidebar fixe -->
+            <div class="admin-sidebar p-3">
+                <div class="text-white mb-4">
+                    <h5><i class="fas fa-cog me-2"></i>Administration</h5>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link text-white" th:href="@{/admin/personnel}">
+                        <i class="fas fa-users me-2"></i>Personnel
+                    </a>
+                    <a class="nav-link text-white" th:href="@{/admin/candidates}">
+                        <i class="fas fa-user-tie me-2"></i>Candidats
+                    </a>
+                    <a class="nav-link text-white" th:href="@{/admin/interviews}">
+                        <i class="fas fa-clipboard-check me-2"></i>Entretiens
+                    </a>
+                    <a class="nav-link text-white" th:href="@{/admin/results}">
+                        <i class="fas fa-trophy me-2"></i>Résultats
+                    </a>
+                    <a class="nav-link text-white active" th:href="@{/offers/create}">
+                        <i class="fas fa-plus-circle me-2"></i>Publier une offre
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="main-content">
+                <div class="p-4">
+                    <h2><i class="fas fa-plus-circle me-2"></i>Publier une nouvelle offre</h2>
+
+                    <div class="row mt-4">
+                        <div class="col-md-8">
+                            <div class="card job-card">
+                                <div class="card-body">
+                                    <form th:action="@{/offers/create}" th:object="${offer}" method="post">
+                                        <!-- Titre du poste -->
+                                        <div class="mb-3">
+                                            <label for="post" class="form-label">Titre du poste *</label>
+                                            <select class="form-select" id="post" th:field="*{post}" required>
+                                                <option value="">Sélectionnez un poste</option>
+                                                <option th:each="post : ${posts}" th:value="${post.id}"
+                                                    th:text="${post.name}">Maître Brasseur</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Localisation -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="location" class="form-label">Localisation *</label>
+                                                <input type="text" class="form-control" id="location" th:field="*{location}"
+                                                    required placeholder="Ex: Antananarivo, Madagascar">
+                                            </div>
+                                        </div>
+
+                                        <!-- Type de contrat -->
+                                        <div class="mb-3">
+                                            <label for="contractType" class="form-label">Type de contrat *</label>
+                                            <select class="form-select" id="contractType" th:field="*{contractType}"
+                                                required>
+                                                <option value="">Sélectionnez un type de contrat</option>
+                                                <option th:each="contractType : ${contractTypes}"
+                                                    th:value="${contractType.id}" th:text="${contractType.name}">CDI</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- Profil recherché -->
+                                        <div class="mb-3">
+                                            <label for="requiredProfile" class="form-label">Profil recherché</label>
+                                            <textarea class="form-control" id="requiredProfile"
+                                                th:field="*{requiredProfile}" rows="3"
+                                                placeholder="Décrivez le profil recherché..."></textarea>
+                                        </div>
+
+                                        <!-- Expérience -->
+                                        <div class="mb-3">
+                                            <label for="experienceLevel" class="form-label">Niveau d'expérience</label>
+                                            <input type="number" class="form-control" id="experienceLevel"
+                                                th:field="*{experienceLevel}"
+                                                placeholder="Années d'expérience minimum requise">
+                                        </div>
+
+                                        <!-- Diplômes et Filières -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="diploma" class="form-label">Diplôme requis</label>
+                                                <select class="form-select" id="diploma" th:field="*{diploma}">
+                                                    <option value="">Sélectionnez un diplôme</option>
+                                                    <option th:each="filiere : ${filieres}" 
+                                                            th:value="${filiere.name}" 
+                                                            th:text="${filiere.name}">Master</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="filiere" class="form-label">Filière</label>
+                                                <select class="form-select" id="filiere" th:field="*{filiere}">
+                                                    <option value="">Sélectionnez une filière</option>
+                                                    <option th:each="diploma : ${diplomas}" 
+                                                            th:value="${diploma.name}" 
+                                                            th:text="${diploma.name}">Agroalimentaire</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Nombre de places -->
+                                        <div class="mb-3">
+                                            <label for="availablePlaces" class="form-label">Nombre de places disponibles *</label>
+                                            <input type="number" class="form-control" id="availablePlaces"
+                                                th:field="*{availablePlaces}" min="1" value="1" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="dateExpiration" class="form-label">Expiration *</label>
+                                            <input type="date" class="form-control" id="dateExpiration"
+                                                th:field="*{dateExpiration}" min="1" value="1" required>
+                                        </div>
+
+                                        <!-- Boutons -->
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="fas fa-check me-1"></i>Publier l'offre
+                                            </button>
+                                            <a th:href="@{/offers}" class="btn btn-secondary">Annuler</a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Aide & Statistiques -->
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6><i class="fas fa-info-circle me-1"></i>Aide</h6>
+                                </div>
+                                <div class="card-body">
+                                    <h6>Conseils pour une offre efficace :</h6>
+                                    <ul class="small">
+                                        <li>Utilisez un titre clair et précis</li>
+                                        <li>Décrivez les missions de façon concrète</li>
+                                        <li>Soyez transparent sur les compétences requises</li>
+                                        <li>Mentionnez les avantages proposés</li>
+                                        <li>Indiquez une fourchette de salaire si possible</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6><i class="fas fa-chart-bar me-1"></i>Statistiques</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="small mb-2"><strong>Offres actives :</strong> <span
+                                            th:text="${activeOffers}">12</span></p>
+                                    <p class="small mb-2"><strong>Candidatures reçues :</strong> <span
+                                            th:text="${applicationsReceived}">45</span></p>
+                                    <p class="small mb-0"><strong>Taux de réponse :</strong> <span
+                                            th:text="${responseRate}">78%</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

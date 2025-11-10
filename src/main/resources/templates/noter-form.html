@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noter la Candidature</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .note-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .candidate-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .candidate-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            margin: 0 auto 15px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .note-slider {
+            margin: 30px 0;
+        }
+
+        .note-value {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #007bff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .note-range {
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(to right, #dc3545, #ffc107, #28a745);
+        }
+
+        .note-range::-webkit-slider-thumb {
+            appearance: none;
+            height: 25px;
+            width: 25px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .note-range::-moz-range-thumb {
+            height: 25px;
+            width: 25px;
+            border-radius: 50%;
+            background: #007bff;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .evaluation-text {
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .eval-excellent { background-color: #d4edda; color: #155724; }
+        .eval-tres-bon { background-color: #d1ecf1; color: #0c5460; }
+        .eval-bon { background-color: #fff3cd; color: #856404; }
+        .eval-moyen { background-color: #f8d7da; color: #721c24; }
+        .eval-faible { background-color: #f5c6cb; color: #721c24; }
+
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+
+        .btn-noter {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-noter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-retour {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 15px 30px;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="note-card">
+                    <!-- Header avec infos candidat -->
+                    <div class="candidate-header">
+                        <div class="candidate-photo">
+                            <span th:text="${#strings.substring(appliance.person.prenom ?: '', 0, 1) + #strings.substring(appliance.person.nom ?: '', 0, 1)}">AB</span>
+                        </div>
+                        <h2 th:text="${appliance.person.prenom + ' ' + appliance.person.nom}">Nom Prénom</h2>
+                        <p class="mb-0">
+                            <i class="fas fa-briefcase me-2"></i>
+                            <span th:text="${appliance.offer?.post?.name ?: 'Poste non spécifié'}">Poste</span>
+                        </p>
+                    </div>
+
+                    <!-- Formulaire de notation -->
+                    <div class="p-4">
+                        <form th:action="@{/persons/noter}" method="post">
+                            <input type="hidden" name="applianceId" th:value="${appliance.id}">
+
+                            <!-- Section notation -->
+                            <div class="note-slider">
+                                <div class="text-center mb-4">
+                                    <h4><i class="fas fa-star text-warning me-2"></i>Évaluation de l'entretien</h4>
+                                    <p class="text-muted">Attribuez une note de 1 à 10 au candidat</p>
+                                </div>
+
+                                <div class="row align-items-center">
+                                    <div class="col-md-4 text-center">
+                                        <div class="note-value" id="noteDisplay">5</div>
+                                        <small class="text-muted">/ 10</small>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <input type="range" 
+                                               class="form-range note-range" 
+                                               min="1" 
+                                               max="10" 
+                                               value="5" 
+                                               name="note" 
+                                               id="noteRange">
+                                        <div class="d-flex justify-content-between mt-2">
+                                            <small class="text-muted">1 (Très faible)</small>
+                                            <small class="text-muted">10 (Excellent)</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Évaluation textuelle -->
+                                <div class="evaluation-text eval-moyen" id="evaluationText">
+                                    Moyen
+                                </div>
+                            </div>
+
+                            <!-- Informations du candidat -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-section">
+                                        <h6><i class="fas fa-user me-2"></i>Informations personnelles</h6>
+                                        <p class="mb-1"><strong>Contact:</strong> <span th:text="${appliance.person.contact}">contact@email.com</span></p>
+                                        <p class="mb-0"><strong>Âge:</strong> <span th:text="${appliance.person.age + ' ans'}">25 ans</span></p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-section">
+                                        <h6><i class="fas fa-briefcase me-2"></i>Candidature</h6>
+                                        <p class="mb-1"><strong>Poste:</strong> <span th:text="${appliance.offer?.post?.name}">Développeur</span></p>
+                                        <p class="mb-0"><strong>Expérience:</strong> <span th:text="${appliance.experienceLevel}">Junior</span></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Formation et compétences -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-section">
+                                        <h6><i class="fas fa-graduation-cap me-2"></i>Formation</h6>
+                                        <div th:if="${appliance.academicalQualifications != null and !appliance.academicalQualifications.isEmpty()}">
+                                            <p class="mb-1" th:text="${appliance.academicalQualifications[0].diploma?.name ?: 'Non spécifié'}">Diplôme</p>
+                                            <small class="text-muted" th:text="${appliance.academicalQualifications[0].sector?.name ?: 'Secteur non spécifié'}">Secteur</small>
+                                        </div>
+                                        <div th:unless="${appliance.academicalQualifications != null and !appliance.academicalQualifications.isEmpty()}">
+                                            <p class="text-muted mb-0">Aucune formation renseignée</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-section">
+                                        <h6><i class="fas fa-code me-2"></i>Compétences</h6>
+                                        <p class="mb-0" th:if="${appliance.skills != null}" th:text="${appliance.skills}">Compétences techniques</p>
+                                        <p class="text-muted mb-0" th:unless="${appliance.skills != null}">Aucune compétence renseignée</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Commentaires -->
+                            <div class="mb-4">
+                                <label for="commentaire" class="form-label">
+                                    <i class="fas fa-comment me-2"></i>Commentaires et observations
+                                </label>
+                                <textarea class="form-control" 
+                                          id="commentaire" 
+                                          name="commentaire" 
+                                          rows="4" 
+                                          placeholder="Ajoutez vos commentaires sur l'entretien, les points forts, les axes d'amélioration..."></textarea>
+                            </div>
+
+                            <!-- Boutons d'action -->
+                            <div class="text-center">
+                                <a th:href="@{/persons/evaluer}" class="btn btn-retour me-3">
+                                    <i class="fas fa-arrow-left me-2"></i>Retour
+                                </a>
+                                <button type="submit" class="btn btn-noter">
+                                    <i class="fas fa-save me-2"></i>Enregistrer la note
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const noteRange = document.getElementById('noteRange');
+            const noteDisplay = document.getElementById('noteDisplay');
+            const evaluationText = document.getElementById('evaluationText');
+
+            function updateNote() {
+                const value = parseInt(noteRange.value);
+                noteDisplay.textContent = value;
+                
+                // Mise à jour de l'évaluation textuelle
+                let evaluation = '';
+                let className = '';
+                
+                if (value >= 9) {
+                    evaluation = 'Excellent';
+                    className = 'eval-excellent';
+                } else if (value >= 7) {
+                    evaluation = 'Très bon';
+                    className = 'eval-tres-bon';
+                } else if (value >= 5) {
+                    evaluation = 'Bon';
+                    className = 'eval-bon';
+                } else if (value >= 3) {
+                    evaluation = 'Moyen';
+                    className = 'eval-moyen';
+                } else {
+                    evaluation = 'Faible';
+                    className = 'eval-faible';
+                }
+                
+                evaluationText.textContent = evaluation;
+                evaluationText.className = 'evaluation-text ' + className;
+            }
+
+            noteRange.addEventListener('input', updateNote);
+            
+            // Initialisation
+            updateNote();
+        });
+    </script>
+</body>
+</html>

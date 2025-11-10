@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titre}">QCM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .question-card {
+            margin-bottom: 2rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            transition: box-shadow 0.2s;
+        }
+        
+        .question-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .question-header {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-bottom: 1px solid #dee2e6;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        
+        .options-container {
+            padding: 1rem;
+        }
+        
+        .form-check {
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s;
+        }
+        
+        .form-check:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .form-check-input:checked + .form-check-label {
+            color: #0d6efd;
+            font-weight: 500;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #007bff, #0056b3);
+        }
+        
+        .quiz-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .submit-section {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin-top: 2rem;
+            text-center:align;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <!-- En-tête du quiz -->
+        <div class="quiz-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 th:text="${titre}" class="mb-2">QCM</h2>
+                    <p class="mb-0">Répondez à toutes les questions puis soumettez vos réponses</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-light text-dark fs-6"
+                          th:text="'Total: ' + ${questions != null ? questions.size() : 0} + ' questions'">
+                        Total: 10 questions
+                    </span>
+                    <div class="mt-2">
+                        <small class="text-light">Temps estimé: <span th:text="${questions != null ? questions.size() * 2 : 0} + ' min'">20 min</span></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barre de progression -->
+        <div class="progress mb-4" style="height: 6px;">
+            <div class="progress-bar" role="progressbar" style="width: 0%" id="progressBar"></div>
+        </div>
+
+        <!-- Formulaire du quiz -->
+        <form th:action="@{/qcm/correction}" method="post" id="quizForm">
+            <input type="hidden" name="applianceId" th:value="${applianceId}">
+            <div th:each="question, iter : ${questions}">
+                <div class="card question-card" th:attr="data-question=${iter.index}">
+                    <div class="question-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-question-circle me-2 text-primary"></i>
+                            <span th:text="'Question ' + (${iter.index} + 1)">Question 1</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="fw-bold mb-3" th:text="${question.texte}">Texte de la question</p>
+                        
+                        <div class="options-container">
+                            <div th:each="reponse, reponseIter : ${question.reponses}">
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="radio"
+                                           th:name="'reponse_' + ${question.id}"
+                                           th:id="'reponse_' + ${question.id} + '_' + ${reponse.id}"
+                                           th:value="${reponse.id}" 
+                                           required
+                                           onchange="updateProgress()">
+                                    <label class="form-check-label" 
+                                           th:for="'reponse_' + ${question.id} + '_' + ${reponse.id}"
+                                           th:text="${reponse.texte}">
+                                        Option de réponse
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section de soumission -->
+            <div class="submit-section">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-2"><strong>Progression:</strong></p>
+                        <p class="text-muted mb-0" id="progressText">0 sur <span th:text="${questions != null ? questions.size() : 0}">10</span> questions répondues</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
+                                <i class="fas fa-paper-plane me-2"></i>Soumettre le QCM
+                            </button>
+                            <a th:href="@{/qcm}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour à l'accueil
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        let totalQuestions = document.querySelectorAll('.question-card').length;
+        
+        function updateProgress() {
+            let answeredQuestions = 0;
+            let questions = document.querySelectorAll('.question-card');
+            
+            questions.forEach(function(question) {
+                let radioButtons = question.querySelectorAll('input[type="radio"]');
+                let isAnswered = false;
+                
+                radioButtons.forEach(function(radio) {
+                    if (radio.checked) {
+                        isAnswered = true;
+                    }
+                });
+                
+                if (isAnswered) {
+                    answeredQuestions++;
+                    question.style.borderLeft = '4px solid #28a745';
+                } else {
+                    question.style.borderLeft = '4px solid #dee2e6';
+                }
+            });
+            
+            // Mettre à jour la barre de progression
+            let progressPercentage = (answeredQuestions / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progressPercentage + '%';
+            
+            // Mettre à jour le texte de progression
+            document.getElementById('progressText').textContent = 
+                answeredQuestions + ' sur ' + totalQuestions + ' questions répondues';
+            
+            // Activer/désactiver le bouton de soumission
+            let submitBtn = document.getElementById('submitBtn');
+            if (answeredQuestions === totalQuestions) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('btn-outline-success');
+                submitBtn.classList.add('btn-success');
+            } else {
+                submitBtn.disabled = true;
+                submitBtn.classList.remove('btn-success');
+                submitBtn.classList.add('btn-outline-success');
+            }
+        }
+        
+        // Confirmation avant soumission
+        document.getElementById('quizForm').addEventListener('submit', function(e) {
+            let answeredQuestions = document.querySelectorAll('input[type="radio"]:checked').length;
+            
+            if (answeredQuestions < totalQuestions) {
+                e.preventDefault();
+                alert('Veuillez répondre à toutes les questions avant de soumettre.');
+                return false;
+            }
+            
+            if (!confirm('Êtes-vous sûr de vouloir soumettre vos réponses ? Vous ne pourrez plus les modifier.')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Initialiser la progression au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+        });
+    </script>
+</body>
+</html>

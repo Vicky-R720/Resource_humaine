@@ -1,0 +1,59 @@
+package com.itu.gest_emp.service;
+
+// ... imports existants
+import java.util.stream.Collectors;
+
+@Service
+public class ApplianceService {
+    
+    @Autowired
+    private ApplianceRepository applianceRepository;
+    
+    // Méthodes existantes...
+    
+    /**
+     * Filtrer les candidatures par critères multiples
+     */
+    public List<Appliance> filterAppliances(String ageRange, String address, String diploma, 
+                                          String scoreRange, String offer, String company) {
+        List<Appliance> allAppliances = getAllAppliances();
+        List<Appliance> enCoursAppliances = Appliance.getApplianceswithTraitement(allAppliances, "en_cours");
+        
+        return enCoursAppliances.stream()
+            .filter(appliance -> matchesAllCriteria(appliance, ageRange, address, diploma, 
+                                                   scoreRange, offer, company))
+            .collect(Collectors.toList());
+    }
+    
+    /**
+     * Rechercher des candidatures par nom de candidat
+     */
+    public List<Appliance> searchByCandidateName(String name) {
+        return getAllAppliances().stream()
+            .filter(appliance -> {
+                String fullName = appliance.getPerson().getPrenom() + " " + appliance.getPerson().getNom();
+                return fullName.toLowerCase().contains(name.toLowerCase());
+            })
+            .collect(Collectors.toList());
+    }
+    
+    /**
+     * Obtenir les candidatures par niveau de diplôme
+     */
+    public List<Appliance> getByDiplomaLevel(String diplomaLevel) {
+        return getAllAppliances().stream()
+            .filter(appliance -> appliance.getAcademicalQualifications() != null &&
+                               appliance.getAcademicalQualifications().stream()
+                                   .anyMatch(aq -> aq.getDiploma() != null && 
+                                                  diplomaLevel.equals(aq.getDiploma().getName())))
+            .collect(Collectors.toList());
+    }
+    
+    // Méthode privée pour vérifier tous les critères
+    private boolean matchesAllCriteria(Appliance appliance, String ageRange, String address, 
+                                     String diploma, String scoreRange, String offer, String company) {
+        // Logique de filtrage détaillée ici
+        // Cette méthode peut être similaire à celle du contrôleur
+        return true; // Implémentation simplifiée
+    }
+}

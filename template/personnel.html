@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Liste du Personnel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="job-list.html"><i class="fas fa-briefcase me-2"></i>Portal Job - Admin</a>
+            <a href="job-list.html" class="btn btn-outline-light">
+                <i class="fas fa-home me-1"></i>Retour au site
+            </a>
+        </div>
+    </nav>
+
+    <div class="row g-0">
+        <div class="col-md-2">
+            <div class="admin-sidebar p-3">
+                <div class="text-white mb-4">
+                    <h5><i class="fas fa-cog me-2"></i>Administration</h5>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link text-white active" href="admin-personnel.html">
+                        <i class="fas fa-users me-2"></i>Personnel
+                    </a>
+                    <a class="nav-link text-white" href="admin-candidates.html">
+                        <i class="fas fa-user-tie me-2"></i>Candidats
+                    </a>
+                    <a class="nav-link text-white" href="admin-interviews.html">
+                        <i class="fas fa-clipboard-check me-2"></i>Entretiens
+                    </a>
+                    <a class="nav-link text-white" href="admin-results.html">
+                        <i class="fas fa-trophy me-2"></i>Résultats
+                    </a>
+                    <a class="nav-link text-white" href="admin-publish.html">
+                        <i class="fas fa-plus-circle me-2"></i>Publier une offre
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-users me-2"></i>Liste du Personnel</h2>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Ajouter un employé
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nom</th>
+                                        <th>Poste</th>
+                                        <th>Département</th>
+                                        <th>Date d'embauche</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>001</td>
+                                        <td>Martin Dubois</td>
+                                        <td>Développeur Senior</td>
+                                        <td>IT</td>
+                                        <td>15/03/2020</td>
+                                        <td>
+                                            <a href="admin-personnel-detail.html" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>002</td>
+                                        <td>Sophie Laurent</td>
+                                        <td>Chef de Projet</td>
+                                        <td>Marketing</td>
+                                        <td>22/07/2019</td>
+                                        <td>
+                                            <a href="admin-personnel-detail.html" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>003</td>
+                                        <td>Pierre Garcia</td>
+                                        <td>Analyste Financier</td>
+                                        <td>Finance</td>
+                                        <td>10/01/2021</td>
+                                        <td>
+                                            <a href="admin-personnel-detail.html" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

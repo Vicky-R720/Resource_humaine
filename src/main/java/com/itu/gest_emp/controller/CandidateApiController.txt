@@ -1,0 +1,245 @@
+package com.itu.gest_emp.controller;
+
+import com.itu.gest_emp.model.*;
+import com.itu.gest_emp.service.PersonService;
+import com.itu.gest_emp.service.ApplianceService;
+import com.itu.gest_emp.service.AcademicalQualificationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/candidates")
+public class CandidateApiController {
+
+    @Autowired
+    private PersonService personService;
+
+    @Autowired
+    private ApplianceService applianceService;
+
+    @Autowired
+    private AcademicalQualificationService academicalQualificationService;
+
+    /**
+     * Endpoint pour obtenir les informations personnelles du candidat
+     * Exemple de sortie:
+     * {
+     *   "person": {
+     *     "id": 1,
+     *     "nom": "Dupont",
+     *     "prenom": "Jean",
+     *     "contact": "jean.dupont@email.com",
+     *     "age": 28,
+     *     "fullName": "Jean Dupont"
+     *   }
+     * }
+     */
+    @GetMapping("/{id}/person")
+    public ResponseEntity<Map<String, Object>> getCandidatePerson(@PathVariable Long id) {
+        Optional<Person> candidateOpt = personService.getPersonById(id);
+        
+        if (candidateOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Person dmdmllcandidate = candidateOpt.get();
+        
+        Map<String, Object> personData = new HashMap<>();
+        personData.put("id", candidate.getId());
+        personData.put("nom", candidate.getNom());
+        personData.put("prenom", candidate.getPrenom());
+        personData.put("contact", candidate.getContact());
+        personData.put("age", candidate.getAge());
+        personData.put("fullName", candidate.getFullName());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("person", personData);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Endpoint pour obtenir la première offre du candidat
+     * Exemple de sortie:
+     * {
+     *   "offers": {
+     *     "firstOffer": {
+     *       "id": 15,
+     *       "post": {
+     *         "id": 5,
+     *         "name": "Développeur Java",
+     *         "description": "Développement d'applications web Java"
+     *       },
+     *       "companyName": "IT Solutions SARL",
+     *       "location": "Paris",
+     *       "contractType": "CDI",
+     *       "requiredProfile": "Développeur expérimenté en Java/Spring",
+     *       "experienceLevel": "Senior",
+     *       "diploma": "Master en informatique",
+     *       "publicationDate": "2024-01-15T10:30:00"
+     *     },
+     *     "applicationDate": "2024-01-20T14:25:00"
+     *   }
+     * }
+     */
+    @GetMapping("/{id}/first-offer")
+    public ResponseEntity<Map<String, Object>> getCandidateFirstOffer(@PathVariable Long id) {
+        Optional<Person> candidateOpt = personService.getPersonById(id);
+        
+        if (candidateOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Person candidate = candidateOpt.get();
+        List<Appliance> appliances = applianceService.getAppliancesByPersonId(id);
+
+        Map<String, Object> response = new HashMap<>();
+        
+        if (appliances.isEmpty()) {
+            response.put("offers", Map.of("message", "Aucune candidature trouvée"));
+            return ResponseEntity.ok(response);
+        }
+
+        Appliance firstAppliance = appliances.get(0);
+        Offer firstOffer = firstAppliance.getOffer();
+
+        Map<String, Object> offerData = new HashMap<>();
+        offerData.put("id", firstOffer.getId());
+        
+        Map<String, Object> postData = new HashMap<>();
+        postData.put("id", firstOffer.getPost().getId());
+        postData.put("name", firstOffer.getPost().getName());
+        postData.put("description", firstOffer.getPost().getDescription());
+        offerData.put("post", postData);
+        
+        offerData.put("companyName", firstOffer.getCompanyName());
+        offerData.put("location", firstOffer.getLocation());
+        offerData.put("contractType", firstOffer.getContractType().getName());
+        offerData.put("requiredProfile", firstOffer.getRequiredProfile());
+        offerData.put("experienceLevel", firstOffer.getExperienceLevel());
+        offerData.put("diploma", firstOffer.getDiploma());
+        offerData.put("publicationDate", firstOffer.getPublicationDate());
+
+        Map<String, Object> offersResponse = new HashMap<>();
+        offersResponse.put("firstOffer", offerData);
+        offersResponse.put("applicationDate", firstAppliance.getCreatedAt());
+
+        response.put("offers", offersResponse);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Endpoint pour obtenir les diplômes et compétences du candidat
+     * Exemple de sortie:
+     * {
+     *   "qualifications": {
+     *     "skills": "Java, Spring Boot, PostgreSQL, Angular",
+     *     "cvLink": "/uploads/cv/jean_dupont_cv.pdf",
+     *     "diplomas": [
+     *       {
+     *         "id": 1,
+     *         "name": "Master en Informatique",
+     *         "sector": "Informatique",
+     *         "obtainedYear": 2020
+     *       },
+     *       {
+     *         "id": 2,
+     *         "name": "Licence en Mathématiques",
+     *         "sector": "Mathématiques",
+     *         "obtainedYear": 2017
+     *       }
+     *     ],
+     *     "totalDiplomas": 2
+     *   }
+     * }
+     */
+    @GetMapping("/{id}/qualifications")
+    public ResponseEntity<Map<String, Object>> getCandidateQualifications(@PathVariable Long id) {
+        Optional<Person> candidateOpt = personService.getPersonById(id);
+        
+        if (candidateOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Person candidate = candidateOpt.get();
+        List<Appliance> appliances = applianceService.getAppliancesByPersonId(id);
+
+        Map<String, Object> qualificationsData = new HashMap<>();
+
+        // Compétences et CV
+        if (!appliances.isEmpty()) {
+            Appliance latestAppliance = appliances.get(0);
+            qualificationsData.put("skills", latestAppliance.getSkills());
+            qualificationsData.put("cvLink", latestAppliance.getCvLink());
+        } else {
+            qualificationsData.put("skills", "Aucune compétence renseignée");
+            qualificationsData.put("cvLink", null);
+        }
+
+        // Diplômes académiques
+        List<AcademicalQualification> qualifications = academicalQualificationService.getQualificationsByPersonId(id);
+        
+        List<Map<String, Object>> diplomas = qualifications.stream()
+            .map(qualification -> {
+                Map<String, Object> diplomaMap = new HashMap<>();
+                diplomaMap.put("id", qualification.getId());
+                diplomaMap.put("name", qualification.getDiploma().getName());
+                
+                if (qualification.getSector() != null) {
+                    diplomaMap.put("sector", qualification.getSector().getName());
+                }
+                
+                diplomaMap.put("obtainedYear", qualification.getCreatedAt().getYear());
+                return diplomaMap;
+            })
+            .collect(Collectors.toList());
+
+        qualificationsData.put("diplomas", diplomas);
+        qualificationsData.put("totalDiplomas", diplomas.size());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("qualifications", qualificationsData);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Endpoint complet avec toutes les informations du candidat
+     * Exemple de sortie:
+     * {
+     *   "person": { ... },
+     *   "offers": { ... },
+     *   "qualifications": { ... }
+     * }
+     */
+    @GetMapping("/{id}/complete")
+    public ResponseEntity<Map<String, Object>> getCompleteCandidateProfile(@PathVariable Long id) {
+        // Récupérer les données personnelles
+        ResponseEntity<Map<String, Object>> personResponse = getCandidatePerson(id);
+        if (personResponse.getStatusCode().isError()) {
+            return personResponse;
+        }
+
+        // Récupérer les offres
+        ResponseEntity<Map<String, Object>> offersResponse = getCandidateFirstOffer(id);
+        
+        // Récupérer les qualifications
+        ResponseEntity<Map<String, Object>> qualificationsResponse = getCandidateQualifications(id);
+
+        // Combiner toutes les réponses
+        Map<String, Object> completeResponse = new HashMap<>();
+        completeResponse.putAll(personResponse.getBody());
+        completeResponse.putAll(offersResponse.getBody());
+        completeResponse.putAll(qualificationsResponse.getBody());
+
+        return ResponseEntity.ok(completeResponse);
+    }
+}

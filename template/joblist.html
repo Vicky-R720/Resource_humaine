@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Job - Offres d'emploi</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .job-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .job-card:hover {
+            transform: translateY(-5px);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="job-list.html"><i class="fas fa-briefcase me-2"></i>Portal Job</a>
+            <div class="d-flex">
+                <a href="admin-personnel.html" class="btn btn-light">
+                    <i class="fas fa-cog me-1"></i>Admin
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-filter me-2"></i>Filtres</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Localisation</label>
+                            <select class="form-select">
+                                <option>Toutes les villes</option>
+                                <option>Paris</option>
+                                <option>Lyon</option>
+                                <option>Marseille</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Domaine</label>
+                            <select class="form-select">
+                                <option>Tous les domaines</option>
+                                <option>Informatique</option>
+                                <option>Marketing</option>
+                                <option>Finance</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Type de contrat</label>
+                            <select class="form-select">
+                                <option>Tous</option>
+                                <option>CDI</option>
+                                <option>CDD</option>
+                                <option>Stage</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Offres d'emploi disponibles</h2>
+                    <span class="badge bg-primary fs-6">5 offres trouvées</span>
+                </div>
+                
+                <div class="card job-card mb-3" onclick="location.href='job-detail.html'">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title text-primary">Développeur Full Stack</h5>
+                                <p class="text-muted mb-2"><i class="fas fa-building me-1"></i>TechCorp Solutions</p>
+                                <p class="text-muted mb-2"><i class="fas fa-map-marker-alt me-1"></i>Paris, France</p>
+                                <p class="card-text">Recherchons un développeur expérimenté pour rejoindre notre équipe...</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="badge bg-success mb-2">CDI</span><br>
+                                <span class="badge bg-info mb-2">Informatique</span><br>
+                                <small class="text-muted">Publié il y a 2 jours</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card job-card mb-3" onclick="location.href='job-detail.html'">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title text-primary">Chef de Projet Marketing</h5>
+                                <p class="text-muted mb-2"><i class="fas fa-building me-1"></i>MarketPro Agency</p>
+                                <p class="text-muted mb-2"><i class="fas fa-map-marker-alt me-1"></i>Lyon, France</p>
+                                <p class="card-text">Pilotage de campagnes marketing digitales innovantes...</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="badge bg-success mb-2">CDI</span><br>
+                                <span class="badge bg-warning mb-2">Marketing</span><br>
+                                <small class="text-muted">Publié il y a 5 jours</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card job-card mb-3" onclick="location.href='job-detail.html'">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title text-primary">Stagiaire Développeur Mobile</h5>
+                                <p class="text-muted mb-2"><i class="fas fa-building me-1"></i>MobileFirst Studio</p>
+                                <p class="text-muted mb-2"><i class="fas fa-map-marker-alt me-1"></i>Marseille, France</p>
+                                <p class="card-text">Stage de 6 mois en développement d'applications mobiles...</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <span class="badge bg-secondary mb-2">Stage</span><br>
+                                <span class="badge bg-info mb-2">Informatique</span><br>
+                                <small class="text-muted">Publié il y a 1 semaine</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

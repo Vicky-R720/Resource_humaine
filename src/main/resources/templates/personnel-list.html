@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Liste du Personnel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Navbar fixe en haut */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            height: 56px; /* Hauteur standard de la navbar Bootstrap */
+        }
+
+        /* Sidebar fixe avec décalage pour la navbar */
+        .admin-sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: fixed;
+            width: 16.666667%;
+            top: 56px; /* Décalage pour la navbar */
+            left: 0;
+            z-index: 1020;
+            overflow-y: auto; /* Permet le scroll dans la sidebar si nécessaire */
+        }
+
+        /* Contenu principal avec décalage pour navbar et sidebar */
+        .main-content {
+            margin-left: 16.666667%;
+            margin-top: 56px; /* Décalage pour la navbar */
+            width: 83.333333%;
+            min-height: calc(100vh - 56px);
+        }
+
+        /* Ajustement pour que le body n'ait pas de margin par défaut */
+        body {
+            padding-top: 0;
+        }
+
+        /* Classes existantes inchangées */
+        .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+        .personnel-card {
+            border-left: 4px solid #28a745;
+            transition: transform 0.2s;
+        }
+        .personnel-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .search-form {
+            max-width: 300px;
+        }
+
+        /* Responsive pour petits écrans */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 100%;
+                position: static;
+                min-height: auto;
+                top: auto;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                margin-top: 56px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar fixe -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-briefcase me-2"></i>BeerBears - Admin
+            </a>
+            <a href="/" class="btn btn-outline-light">
+                <i class="fas fa-home me-1"></i>Retour au site
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- Sidebar fixe -->
+            <div class="admin-sidebar p-3">
+                <div class="text-white mb-4">
+                    <h5><i class="fas fa-cog me-2"></i>Administration</h5>
+                </div>
+                 <nav class="nav flex-column">
+                    <a class="nav-link text-white" href="/admin/personnel">
+                        <i class="fas fa-users me-2"></i>Personnel
+                    </a>
+                    <a class="nav-link text-white" href="/persons/evaluer">
+                        <i class="fas fa-user-tie me-2"></i>evaluer candidat
+                    </a>
+                    <a class="nav-link text-white active" href="/persons/notes">
+                        <i class="fas fa-file-alt me-2"></i>valider
+                </span>
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="main-content">
+                <div class="p-4">
+                    <!-- Header avec recherche -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="mb-0">
+                            <i class="fas fa-users me-2 text-success"></i>Liste du Personnel
+                        </h2>
+                        
+                        <!-- Formulaire de recherche -->
+                        <form th:action="@{/admin/personnel}" method="get" class="d-flex search-form">
+                            <div class="input-group">
+                                <input type="text" name="search" class="form-control" 
+                                       placeholder="Rechercher un employé..." 
+                                       th:value="${param.search}"
+                                       aria-label="Rechercher">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <a th:href="@{/admin/personnel}" class="btn btn-outline-secondary" 
+                                   th:if="${param.search != null}">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Statistiques -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title" th:text="${personnel != null ? personnel.size() : 0}">0</h5>
+                                    <p class="card-text">Employés total</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title" th:text="${personnelThisMonth}">0</h5>
+                                    <p class="card-text">Embauches ce mois</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liste du personnel -->
+                    <div class="row" th:if="${personnel != null and !personnel.empty}">
+                        <div class="col-md-4 mb-3" th:each="employe : ${personnel}">
+                            <div class="card personnel-card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0" th:text="${employe.personne.prenom + ' ' + employe.personne.nom}">
+                                            Nom Prénom
+                                        </h6>
+                                        <span class="badge bg-success" th:text="${employe.personne.age + ' ans'}">30 ans</span>
+                                    </div>
+                                    
+                                    <!-- Poste -->
+                                    <p class="card-text text-muted small mb-2">
+                                        <i class="fas fa-briefcase me-1"></i>
+                                        <span th:text="${employe.poste}">Poste</span>
+                                    </p>
+                                    
+                                    <!-- Contact -->
+                                    <p class="small mb-2">
+                                        <i class="fas fa-envelope me-1 text-success"></i>
+                                        <span th:text="${employe.personne.contact}" class="text-break">contact@email.com</span>
+                                    </p>
+                                    
+                                    <!-- Date d'embauche -->
+                                    <p class="small text-muted mb-3">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        Embauché le: 
+                                        <span th:text="${#temporals.format(employe.dateEmbauche, 'dd/MM/yyyy')}">
+                                            14/09/2025
+                                        </span>
+                                    </p>
+                                    
+                                    <!-- Actions -->
+                                    <div class="d-flex gap-2">
+                                        <a th:href="@{'/admin/personnel-detail/' + ${employe.idPersonnel}}" 
+                                           class="btn btn-sm btn-success flex-fill">
+                                            <i class="fas fa-eye me-1"></i>Voir détail
+                                        </a>
+                                        <a th:href="@{'mailto:' + ${employe.personne.contact}}" 
+                                           class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-envelope"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message si aucun personnel -->
+                    <div th:if="${personnel == null or personnel.empty}">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle fa-2x mb-3"></i>
+                            <h5>Aucun employé trouvé</h5>
+                            <p th:if="${param.search != null}">
+                                Aucun résultat pour la recherche: "<span th:text="${param.search}"></span>"
+                            </p>
+                            <p th:unless="${param.search != null}">
+                                Aucun employé n'a été enregistré pour le moment.
+                            </p>
+                            <a th:href="@{/admin/personnel}" class="btn btn-success mt-2" th:if="${param.search != null}">
+                                Voir tous les employés
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

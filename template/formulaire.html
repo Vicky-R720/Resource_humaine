@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Job - Candidature</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .file-upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .file-upload-area:hover {
+            border-color: #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="job-list.html"><i class="fas fa-briefcase me-2"></i>Portal Job</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <a href="job-detail.html" class="btn btn-outline-secondary mb-3">
+                    <i class="fas fa-arrow-left me-1"></i>Retour à l'offre
+                </a>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-user-plus me-2"></i>Postuler pour : <span class="text-primary">Développeur Full Stack</span></h4>
+                    </div>
+                    <div class="card-body">
+                        <form>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Prénom *</label>
+                                    <input type="text" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Nom *</label>
+                                    <input type="text" class="form-control" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Téléphone *</label>
+                                    <input type="tel" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">CV (PDF) *</label>
+                                <div class="file-upload-area" onclick="document.getElementById('cvFile').click()">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Cliquez ici pour télécharger votre CV</p>
+                                    <input type="file" id="cvFile" accept=".pdf" style="display: none;">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Années d'expérience</label>
+                                <select class="form-select">
+                                    <option>Moins d'1 an</option>
+                                    <option>1-2 ans</option>
+                                    <option>3-5 ans</option>
+                                    <option>5-10 ans</option>
+                                    <option>Plus de 10 ans</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Compétences techniques principales</label>
+                                <textarea class="form-control" rows="3" placeholder="Ex: JavaScript, React, Node.js, MongoDB..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Expérience professionnelle</label>
+                                <textarea class="form-control" rows="4" placeholder="Décrivez brièvement vos expériences pertinentes..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Formation / Diplômes</label>
+                                <textarea class="form-control" rows="3" placeholder="Indiquez vos formations principales..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Stages effectués</label>
+                                <textarea class="form-control" rows="3" placeholder="Décrivez vos stages significatifs..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Lettre de motivation</label>
+                                <textarea class="form-control" rows="5" placeholder="Expliquez votre motivation pour ce poste..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Prétentions salariales (optionnel)</label>
+                                <input type="text" class="form-control" placeholder="Ex: 45 000€ annuel">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Disponibilité</label>
+                                <select class="form-select">
+                                    <option>Immédiate</option>
+                                    <option>1 mois</option>
+                                    <option>2 mois</option>
+                                    <option>3 mois ou plus</option>
+                                </select>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-paper-plane me-2"></i>Envoyer ma candidature
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Liste des Candidats</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+        .candidate-card {
+            border-left: 4px solid #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="job-list.html"><i class="fas fa-briefcase me-2"></i>Portal Job - Admin</a>
+            <a href="job-list.html" class="btn btn-outline-light">
+                <i class="fas fa-home me-1"></i>Retour au site
+            </a>
+        </div>
+    </nav>
+
+    <div class="row g-0">
+        <div class="col-md-2">
+            <div class="admin-sidebar p-3">
+                <div class="text-white mb-4">
+                    <h5><i class="fas fa-cog me-2"></i>Administration</h5>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link text-white" href="admin-personnel.html">
+                        <i class="fas fa-users me-2"></i>Personnel
+                    </a>
+                    <a class="nav-link text-white active" href="admin-candidates.html">
+                        <i class="fas fa-user-tie me-2"></i>Candidats
+                    </a>
+                    <a class="nav-link text-white" href="admin-interviews.html">
+                        <i class="fas fa-clipboard-check me-2"></i>Entretiens
+                    </a>
+                    <a class="nav-link text-white" href="admin-results.html">
+                        <i class="fas fa-trophy me-2"></i>Résultats
+                    </a>
+                    <a class="nav-link text-white" href="admin-publish.html">
+                        <i class="fas fa-plus-circle me-2"></i>Publier une offre
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-user-tie me-2"></i>Liste des Candidats</h2>
+                    <select class="form-select w-auto">
+                        <option>Tous les postes</option>
+                        <option>Développeur Full Stack</option>
+                        <option>Chef de Projet Marketing</option>
+                        <option>Stagiaire Développeur Mobile</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card candidate-card">
+                            <div class="card-body">
+                                <h6 class="card-title">Jean Dupont</h6>
+                                <p class="card-text text-muted">Développeur Full Stack</p>
+                                <p class="small">
+                                    <i class="fas fa-envelope me-1"></i>jean.dupont@email.com<br>
+                                    <i class="fas fa-phone me-1"></i>06 12 34 56 78
+                                </p>
+                                <p class="small text-muted">Candidature: 14/09/2025</p>
+                                <a href="admin-candidate-detail.html" class="btn btn-sm btn-primary">
+                                    Voir détail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card candidate-card">
+                            <div class="card-body">
+                                <h6 class="card-title">Marie Martin</h6>
+                                <p class="card-text text-muted">Chef de Projet Marketing</p>
+                                <p class="small">
+                                    <i class="fas fa-envelope me-1"></i>marie.martin@email.com<br>
+                                    <i class="fas fa-phone me-1"></i>06 98 76 54 32
+                                </p>
+                                <p class="small text-muted">Candidature: 13/09/2025</p>
+                                <a href="admin-candidate-detail.html" class="btn btn-sm btn-primary">
+                                    Voir détail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card candidate-card">
+                            <div class="card-body">
+                                <h6 class="card-title">Thomas Bernard</h6>
+                                <p class="card-text text-muted">Stagiaire Développeur Mobile</p>
+                                <p class="small">
+                                    <i class="fas fa-envelope me-1"></i>thomas.bernard@email.com<br>
+                                    <i class="fas fa-phone me-1"></i>06 11 22 33 44
+                                </p>
+                                <p class="small text-muted">Candidature: 12/09/2025</p>
+                                <a href="admin-candidate-detail.html" class="btn btn-sm btn-primary">
+                                    Voir détail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

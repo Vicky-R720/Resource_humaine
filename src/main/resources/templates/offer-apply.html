@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Job - Formulaire de Candidature</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Styles pour la notification */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .notification-dropdown {
+            width: 350px;
+        }
+        
+        .notification-item {
+            border-left: 3px solid transparent;
+            padding: 10px 15px;
+            transition: all 0.2s;
+        }
+        
+        .notification-item.unread {
+            border-left-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        
+        .notification-item:hover {
+            background-color: #e9ecef;
+        }
+        
+        .notification-time {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+        
+        .dropdown-item-text {
+            white-space: normal;
+        }
+        
+        .user-dropdown {
+            min-width: 200px;
+        }
+        
+        .quiz-btn {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .application-card {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        
+        .section-title {
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+        
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+        
+        .offer-header {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar complète avec notifications -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" th:href="@{/offers}">
+                <i class="fas fa-briefcase me-2"></i>BeerBears
+            </a>
+            
+            <div class="d-flex align-items-center">
+                <!-- Notification dropdown -->
+                <div class="dropdown me-3" th:if="${session.user != null}">
+                    <button class="btn btn-light position-relative" type="button" id="notificationDropdown" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span th:if="${notifications != null and !notifications.isEmpty()}" 
+                              class="notification-badge" th:text="${notifications.size()}">
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown">
+                        <li class="dropdown-header">Notifications</li>
+                        <li><hr class="dropdown-divider"></li>
+                        
+                        <div th:if="${notifications == null or notifications.isEmpty()}">
+                            <li class="px-3 py-2 text-muted">Aucune notification</li>
+                        </div>
+                        
+                        <div th:each="notification : ${notifications}">
+                            <li>
+                                <div class="notification-item unread">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>Nouvelle notification</strong>
+                                        <span class="notification-time" 
+                                              th:text="${#temporals.format(notification.createdAt, 'dd/MM HH:mm')}">
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Gestion du pattern QUIZ_READY -->
+                                    <div th:if="${notification.message.startsWith('QUIZ_READY:')}">
+                                        <p class="dropdown-item-text mb-1">
+                                            Votre candidature pour le poste 
+                                            '<span th:text="${notification.message.substring(11)}"></span>' 
+                                            a été présélectionnée.
+                                        </p>
+                                        <a th:href="@{'/qcm/mixte/' + ${notification.appliance.id}}" class="btn btn-success btn-sm mt-1 quiz-btn">
+                                            <i class="fas fa-play-circle me-1"></i>Faire le quiz
+                                        </a>
+                                    </div>
+                                    
+                                    <!-- Notification normale -->
+                                    <p th:unless="${notification.message.startsWith('QUIZ_READY:')}" 
+                                       class="dropdown-item-text mb-0" 
+                                       th:text="${notification.message}">
+                                    </p>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                        </div>
+                        
+                        <li class="text-center">
+                            <a th:href="@{/notifications}" class="dropdown-item">Voir toutes les notifications</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Menu utilisateur -->
+                <div class="dropdown" th:if="${session.user != null}">
+                    <button class="btn btn-light dropdown-toggle" type="button" id="userDropdown" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${session.user.prenom} + ' ' + ${session.user.nom}"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end user-dropdown" aria-labelledby="userDropdown">
+                        <li class="dropdown-header">
+                            Connecté en tant que<br>
+                            <strong th:text="${session.user.contact}"></strong>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/dashboard}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Tableau de bord
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/appliances}">
+                                <i class="fas fa-file-alt me-2"></i>Mes candidatures
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/profile}">
+                                <i class="fas fa-user-edit me-2"></i>Mon profil
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/logout}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Boutons de connexion/inscription si non connecté -->
+                <div th:unless="${session.user != null}">
+                    <a th:href="@{/login}" class="btn btn-light me-2">
+                        <i class="fas fa-sign-in-alt me-1"></i>Connexion
+                    </a>
+                    <a th:href="@{/register}" class="btn btn-outline-light">
+                        <i class="fas fa-user-plus me-1"></i>Inscription
+                    </a>
+                </div>
+                
+                <!-- Bouton admin (toujours visible) -->
+                <a th:href="@{/admin/personnel}" class="btn btn-light ms-2">
+                    <i class="fas fa-cog me-1"></i>Admin
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- En-tête de l'offre -->
+                <div class="offer-header">
+                    <h3 class="mb-2"><i class="fas fa-briefcase me-2"></i>Formulaire de Candidature</h3>
+                    <h4 class="mb-0" th:text="${posteDispo}">Développeur Web Fullstack</h4>
+                </div>
+
+                <div class="card application-card">
+                    <div class="card-body p-4">
+                        <form id="applicationForm" th:action="@{/offers/apply}" method="post">
+                            <!-- Champ caché pour l'ID de l'offre -->
+                            <input type="hidden" name="offerId" th:value="${offerId}">
+                            
+                            <!-- Section Qualifications académiques -->
+                            <h4 class="section-title mt-4">Qualifications académiques</h4>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="diploma" class="form-label required-field">Diplôme</label>
+                                    <select class="form-select" id="diploma" name="diplomaId" required>
+                                        <option value="" selected disabled>Filiere</option>
+                                        <option th:each="diploma : ${diplomas}" 
+                                                th:value="${diploma.id}" 
+                                                th:text="${diploma.name}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="filiere" class="form-label required-field">Diplome</label>
+                                    <select class="form-select" id="filiere" name="filiereId" required>
+                                        <option value="" selected disabled>Sélectionnez une filière</option>
+                                        <option th:each="filiere : ${filieres}" 
+                                                th:value="${filiere.id}" 
+                                                th:text="${filiere.name}">
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mt-3">
+                                    <label for="sector" class="form-label required-field">Secteur d'activité</label>
+                                    <select class="form-select" id="sector" name="sectorId" required>
+                                        <option value="" selected disabled>Sélectionnez secteur</option>
+                                        <option th:each="sector : ${sectors}" 
+                                                th:value="${sector.id}" 
+                                                th:text="${sector.name}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Section Expérience professionnelle -->
+                            <h4 class="section-title mt-5">Expérience professionnelle</h4>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="experienceYears" class="form-label required-field">Années d'expérience</label>
+                                    <select class="form-select" id="experienceYears" name="experienceYears" required>
+                                        <option value="" selected disabled>Sélectionnez</option>
+                                        <option value="0">Débutant (0-1 an)</option>
+                                        <option value="1-3">1-3 ans</option>
+                                        <option value="3-5">3-5 ans</option>
+                                        <option value="5-10">5-10 ans</option>
+                                        <option value="10+">Plus de 10 ans</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="domainExperience" class="form-label required-field">Nombre d'années d'expérience dans le domaine</label>
+                                    <input type="number" class="form-control" id="domainExperience" name="domainExperience" 
+                                           min="0" placeholder="Ex: 3" required>
+                                </div>
+                            </div>
+                            
+                            <!-- Section Compétences -->
+                            <h4 class="section-title mt-5">Compétences</h4>
+                            
+                            <div class="mb-3">
+                                <label for="skills" class="form-label required-field">Listez vos compétences (séparées par des virgules)</label>
+                                <textarea class="form-control" id="skills" name="skills" rows="3" 
+                                          placeholder="Ex: Java, HTML, CSS, Gestion de projet, Communication..." required></textarea>
+                                <div class="form-text">Mentionnez vos compétences techniques et transversales</div>
+                            </div>
+                            
+                            <!-- Section Consentement -->
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="consent" name="consent" required>
+                                <label class="form-check-label" for="consent">J'autorise le traitement de mes données personnelles pour le processus de recrutement</label>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                                <a th:href="@{/offers/details/}+${offerId}" class="btn btn-secondary me-md-2">Annuler</a>
+                                <button type="submit" class="btn btn-primary">Soumettre ma candidature</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <div class="container">
+            <p class="mb-0">© 2023 Portal Job - Tous droits réservés</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

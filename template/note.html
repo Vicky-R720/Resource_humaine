@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Notes d'Entretien</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="job-list.html"><i class="fas fa-briefcase me-2"></i>Portal Job - Admin</a>
+            <a href="job-list.html" class="btn btn-outline-light">
+                <i class="fas fa-home me-1"></i>Retour au site
+            </a>
+        </div>
+    </nav>
+
+    <div class="row g-0">
+        <div class="col-md-2">
+            <div class="admin-sidebar p-3">
+                <div class="text-white mb-4">
+                    <h5><i class="fas fa-cog me-2"></i>Administration</h5>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link text-white" href="admin-personnel.html">
+                        <i class="fas fa-users me-2"></i>Personnel
+                    </a>
+                    <a class="nav-link text-white" href="admin-candidates.html">
+                        <i class="fas fa-user-tie me-2"></i>Candidats
+                    </a>
+                    <a class="nav-link text-white active" href="admin-interviews.html">
+                        <i class="fas fa-clipboard-check me-2"></i>Entretiens
+                    </a>
+                    <a class="nav-link text-white" href="admin-results.html">
+                        <i class="fas fa-trophy me-2"></i>Résultats
+                    </a>
+                    <a class="nav-link text-white" href="admin-publish.html">
+                        <i class="fas fa-plus-circle me-2"></i>Publier une offre
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <div class="p-4">
+                <h2><i class="fas fa-clipboard-check me-2"></i>Notes d'Entretien</h2>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Jean Dupont - Développeur Full Stack</h5>
+                            </div>
+                            <div class="card-body">
+                                <form>
+                                    <div class="mb-3">
+                                        <label class="form-label">Tenue vestimentaire</label>
+                                        <select class="form-select">
+                                            <option>Excellent</option>
+                                            <option>Bien</option>
+                                            <option>Moyen</option>
+                                            <option>Insuffisant</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Communication</label>
+                                        <select class="form-select">
+                                            <option>Excellent</option>
+                                            <option>Bien</option>
+                                            <option>Moyen</option>
+                                            <option>Insuffisant</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Compétences techniques</label>
+                                        <select class="form-select">
+                                            <option>Excellent</option>
+                                            <option>Bien</option>
+                                            <option>Moyen</option>
+                                            <option>Insuffisant</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Motivation</label>
+                                        <select class="form-select">
+                                            <option>Excellent</option>
+                                            <option>Bien</option>
+                                            <option>Moyen</option>
+                                            <option>Insuffisant</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Notes libres</label>
+                                        <textarea class="form-control" rows="3" placeholder="Remarques générales sur l'entretien..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Test Psychologique</h5>
+                            </div>
+                            <div class="card-body">
+                                <form>
+                                    <div class="mb-3">
+                                        <label class="form-label">Score logique (/20)</label>
+                                        <input type="number" class="form-control" max="20" min="0" placeholder="15">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Score créativité (/20)</label>
+                                        <input type="number" class="form-control" max="20" min="0" placeholder="16">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Score relationnel (/20)</label>
+                                        <input type="number" class="form-control" max="20" min="0" placeholder="18">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Score technique (/20)</label>
+                                        <input type="number" class="form-control" max="20" min="0" placeholder="17">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Commentaires</label>
+                                        <textarea class="form-control" rows="3" placeholder="Observations sur les tests..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-success">Valider les tests</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

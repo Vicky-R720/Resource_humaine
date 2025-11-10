@@ -1,0 +1,477 @@
+package com.itu.gest_emp.model;
+
+import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+
+public class Matching {
+    
+    // Remplacez YOUR_API_KEY par votre vraie clé API Gemini
+    private static final String GEMINI_API_KEY = "AIzaSyCzBRmZVv3a03y2pzHlwMbHRe7JFf92qwI";
+    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
+    
+    public static double calculerPourcentageMatching(String competencesRecruteur, String competencesCandidat) {
+        try {
+            String prompt = createPrompt(competencesRecruteur, competencesCandidat);
+            String response = callGeminiAPI(prompt);
+            return extractPercentageFromResponse(response);
+            
+        } catch (Exception e) {
+            System.err.println("Erreur lors du matching: " + e.getMessage());
+            return -1.0;
+        }
+    }
+    
+    private static String createPrompt(String competencesRecruteur, String competencesCandidat) {
+        return "Tu es un expert RH. Analyse les faits requises par le recruteur et celles du candidat.soit stricte elimine ce qui n'en valle pas si le diplome n'a strictement rien a voir avec le diplome requise ou les competences ou l'experience met en dessous de 50% "
+                + "Calcule un pourcentage de matching entre 0 et 100 basé sur la correspondance des compétences. "
+                + "Réponds UNIQUEMENT par le nombre (exemple: 75.5).\\n\\n"
+                + "COMPÉTENCES REQUISES: " + competencesRecruteur + "\\n\\n"
+                + "Pourcentage de matching:";
+    }
+    
+    private static String callGeminiAPI(String prompt) throws IOException {
+        URL url = new URL(GEMINI_API_URL);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        
+        // Configuration de la connexion
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoOutput(true);
+        
+        // Construction du JSON pour Gemini
+        String jsonBody = buildGeminiJsonRequest(prompt);
+        
+        // Envoi de la requête
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        }
+        
+        // Lecture de la réponse
+        int responseCode = connection.getResponseCode();
+        if (responseCode != HttpURLConnection.HTTP_OK) {
+            // Lire le message d'erreur
+            String errorMessage = "";
+            try (BufferedReader errorReader = new BufferedReader(
+                    new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8))) {
+                String line;
+                StringBuilder errorResponse = new StringBuilder();
+                while ((line = errorReader.readLine()) != null) {
+                    errorResponse.append(line);
+                }
+                errorMessage = errorResponse.toString();
+            } catch (Exception e) {
+                errorMessage = connection.getResponseMessage();
+            }
+            throw new IOException("Erreur API Gemini: " + responseCode + " - " + errorMessage);
+        }
+        
+        StringBuilder response = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+            String responseLine;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+        }
+        
+        return extractContentFromGeminiResponse(response.toString());
+    }
+    
+    private static String buildGeminiJsonRequest(String prompt) {
+        String escapedPrompt = escapeJsonString(prompt);
+        
+        return "{"
+            + "\"contents\":["
+                + "{"
+                    + "\"parts\":["
+                        + "{"
+                            + "\"text\":\"" + escapedPrompt + "\""
+                        + "}"
+                    + "]"
+                + "}"
+            + "],"
+            + "\"generationConfig\":{"
+                + "\"temperature\":0.1,"
+                + "\"maxOutputTokens\":10"
+            + "}"
+            + "}";
+    }
+    
+    private static String escapeJsonString(String str) {
+        return str.replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
+                  .replace("\n", "\\n")
+                  .replace("\r", "\\r")
+                  .replace("\t", "\\t");
+    }
+    
+    private static String extractContentFromGeminiResponse(String jsonResponse) {
+        try {
+            // Gemini retourne: {"candidates":[{"content":{"parts":[{"text":"contenu"}]}}]}
+            int textStart = jsonResponse.indexOf("\"text\": \"");
+            if (textStart == -1) {
+                // Essayer sans espace après les deux points
+                textStart = jsonResponse.indexOf("\"text\":\"");
+                if (textStart == -1) {
+                    throw new RuntimeException("Texte non trouvé dans la réponse Gemini");
+                }
+                textStart += 8; // Longueur de "text":"
+            } else {
+                textStart += 9; // Longueur de "text": "
+            }
+            
+            // Trouver la fin en cherchant la prochaine quote suivie de } ou ]
+            int textEnd = textStart;
+            boolean foundEnd = false;
+            
+            while (textEnd < jsonResponse.length() - 1) {
+                if (jsonResponse.charAt(textEnd) == '"') {
+                    // Vérifier que ce n'est pas une quote échappée
+                    boolean isEscaped = false;
+                    int backslashCount = 0;
+                    for (int i = textEnd - 1; i >= 0 && jsonResponse.charAt(i) == '\\'; i--) {
+                        backslashCount++;
+                    }
+                    isEscaped = (backslashCount % 2 == 1);
+                    
+                    if (!isEscaped) {
+                        // Vérifier que c'est bien la fin (suivi de } ou ])
+                        char nextChar = jsonResponse.charAt(textEnd + 1);
+                        if (nextChar == '}' || nextChar == ']' || nextChar == ',' || Character.isWhitespace(nextChar)) {
+                            foundEnd = true;
+                            break;
+                        }
+                    }
+                }
+                textEnd++;
+            }
+            
+            if (!foundEnd) {
+                throw new RuntimeException("Fin du texte non trouvée");
+            }
+            
+            String content = jsonResponse.substring(textStart, textEnd);
+            // Décoder les échappements JSON basiques
+            return content.replace("\\n", "\n")
+                         .replace("\\\"", "\"")
+                         .replace("\\\\", "\\")
+                         .trim();
+            
+        } catch (Exception e) {
+            System.err.println("Erreur lors du parsing JSON Gemini: " + e.getMessage());
+            System.err.println("Réponse reçue: " + jsonResponse);
+            return "0";
+        }
+    }
+    
+    private static double extractPercentageFromResponse(String response) {
+        try {
+            System.out.println("Réponse brute de Gemini: " + response); // Debug
+            
+            // Nettoyer la réponse pour extraire uniquement le nombre
+            String cleanResponse = response.replaceAll("[^0-9.]", "").trim();
+            if (cleanResponse.isEmpty()) {
+                return 0.0;
+            }
+            
+            // Gérer le cas où il y a plusieurs nombres (prendre le premier)
+            if (cleanResponse.contains(".")) {
+                String[] parts = cleanResponse.split("\\.");
+                if (parts.length >= 2) {
+                    cleanResponse = parts[0] + "." + parts[1];
+                }
+            }
+            
+            return Double.parseDouble(cleanResponse);
+        } catch (NumberFormatException e) {
+            System.err.println("Impossible de parser la réponse: " + response);
+            return 0.0;
+        }
+    }
+    
+    // Méthode pour tester la connexion API
+    public static boolean testAPIConnection() {
+        try {
+            String response = callGeminiAPI("Réponds juste: OK");
+            System.out.println("Test de connexion réussi. Réponse: " + response);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Test de connexion échoué: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    // Méthode de test
+    public static void main(String[] args) {
+        // Vérifier que la clé API est configurée
+        if (GEMINI_API_KEY.equals("YOUR_API_KEY")) {
+            System.err.println("ERREUR: Vous devez remplacer YOUR_API_KEY par votre vraie clé API Gemini!");
+            System.err.println("Obtenez votre clé sur: https://aistudio.google.com/");
+            return;
+        }
+        
+        System.out.println("=== Test de connexion à Gemini ===");
+        if (!testAPIConnection()) {
+            return;
+        }
+        
+        System.out.println("\n=== Test de matching ===");
+        
+        String competencesRecruteur = "Java, Spring Boot, MySQL, REST API, Docker";
+        String competencesCandidat = "Java, Spring, PostgreSQL, API REST, Kubernetes";
+        
+        double matching = calculerPourcentageMatching(competencesRecruteur, competencesCandidat);
+        System.out.println("\nCompétences requises: " + competencesRecruteur);
+        System.out.println("Compétences candidat: " + competencesCandidat);
+        System.out.println("Pourcentage de matching: " + matching + "%");
+    }
+}
+
+package com.itu.gest_emp.model;
+
+import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+
+public class Matching {
+    
+    private static final String GEMINI_API_KEY = "AIzaSyCzBRmZVv3a03y2pzHlwMbHRe7JFf92qwI";
+    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY;
+    
+    // Variable pour suivre l'état du quota
+    private static boolean quotaExceeded = false;
+    private static long lastQuotaExceededTime = 0;
+    
+    public static double calculerPourcentageMatching(String competencesRecruteur, String competencesCandidat) {
+        // Vérifier si le quota a été dépassé récemment
+        if (quotaExceeded && (System.currentTimeMillis() - lastQuotaExceededTime) < 60000) {
+            System.out.println("Utilisation de la méthode locale (quota dépassé)");
+            return calculerMatchingLocal(competencesRecruteur, competencesCandidat);
+        }
+        
+        try {
+            String prompt = createPrompt(competencesRecruteur, competencesCandidat);
+            String response = callGeminiAPI(prompt);
+            double result = extractPercentageFromResponse(response);
+            
+            // Réinitialiser le flag si l'appel réussit
+            quotaExceeded = false;
+            return result;
+            
+        } catch (IOException e) {
+            if (e.getMessage() != null && e.getMessage().contains("429")) {
+                // Quota dépassé, utiliser la méthode locale
+                quotaExceeded = true;
+                lastQuotaExceededTime = System.currentTimeMillis();
+                System.out.println("Quota Gemini dépassé, utilisation de la méthode locale");
+                return calculerMatchingLocal(competencesRecruteur, competencesCandidat);
+            } else {
+                System.err.println("Erreur lors du matching: " + e.getMessage());
+                return calculerMatchingLocal(competencesRecruteur, competencesCandidat);
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors du matching: " + e.getMessage());
+            return calculerMatchingLocal(competencesRecruteur, competencesCandidat);
+        }
+    }
+    
+    /**
+     * Méthode de fallback locale pour calculer le matching sans API
+     */
+    private static double calculerMatchingLocal(String competencesRecruteur, String competencesCandidat) {
+        if (competencesRecruteur == null || competencesCandidat == null || 
+            competencesRecruteur.isEmpty() || competencesCandidat.isEmpty()) {
+            return 0.0;
+        }
+
+        // Convertir en minuscules pour une comparaison insensible à la casse
+        String recruteurLower = competencesRecruteur.toLowerCase();
+        String candidatLower = competencesCandidat.toLowerCase();
+
+        // Diviser les compétences du recruteur par virgules et nettoyer
+        String[] competencesRequises = recruteurLower.split(",");
+        
+        int totalCompetences = competencesRequises.length;
+        int competencesTrouvees = 0;
+
+        // Vérifier chaque compétence requise dans le profil du candidat
+        for (String competence : competencesRequises) {
+            String competenceClean = competence.trim();
+            if (!competenceClean.isEmpty() && candidatLower.contains(competenceClean)) {
+                competencesTrouvees++;
+            }
+        }
+
+        // Calcul du pourcentage de match
+        if (totalCompetences == 0) {
+            return 0.0;
+        }
+
+        double pourcentage = ((double) competencesTrouvees / totalCompetences) * 100;
+        
+        // Bonus pour un profil complet et bien détaillé
+        if (candidatLower.length() > 500) {
+            pourcentage += 5; // Bonus de 5% pour un profil détaillé
+        }
+        
+        // Bonus pour les mots-clés importants
+        String[] motsClesImportants = {"expérience", "diplôme", "formation", "projet", "équipe", "management"};
+        for (String motCle : motsClesImportants) {
+            if (candidatLower.contains(motCle)) {
+                pourcentage += 2; // Bonus de 2% par mot-clé important
+            }
+        }
+
+        // Limiter à 100%
+        return Math.min(pourcentage, 100.0);
+    }
+    
+    private static String createPrompt(String competencesRecruteur, String competencesCandidat) {
+        return "Tu es un expert RH. Analyse les compétences requises par le recruteur et celles du candidat. "
+                + "Calcule un pourcentage de matching entre 0 et 100 basé sur la correspondance des compétences. "
+                + "Réponds UNIQUEMENT par le nombre (exemple: 75.5).\\n\\n"
+                + " " + competencesRecruteur + "\\n\\n"
+                + "Pourcentage de matching:";
+    }
+    
+    private static String callGeminiAPI(String prompt) throws IOException {
+        URL url = new URL(GEMINI_API_URL);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        
+        // Configuration de la connexion
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoOutput(true);
+        connection.setConnectTimeout(10000); // 10 secondes timeout
+        connection.setReadTimeout(10000);    // 10 secondes timeout
+        
+        // Construction du JSON pour Gemini
+        String jsonBody = buildGeminiJsonRequest(prompt);
+        
+        // Envoi de la requête
+        try (OutputStream os = connection.getOutputStream()) {
+            byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        }
+        
+        // Lecture de la réponse
+        int responseCode = connection.getResponseCode();
+        if (responseCode != HttpURLConnection.HTTP_OK) {
+            // Lire le message d'erreur
+            String errorMessage = "";
+            try (BufferedReader errorReader = new BufferedReader(
+                    new InputStreamReader(connection.getErrorStream(), StandardCharsets.UTF_8))) {
+                String line;
+                StringBuilder errorResponse = new StringBuilder();
+                while ((line = errorReader.readLine()) != null) {
+                    errorResponse.append(line);
+                }
+                errorMessage = errorResponse.toString();
+            } catch (Exception e) {
+                errorMessage = connection.getResponseMessage();
+            }
+            throw new IOException("Erreur API Gemini: " + responseCode + " - " + errorMessage);
+        }
+        
+        StringBuilder response = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+            String responseLine;
+            while ((responseLine = br.readLine()) != null) {
+                response.append(responseLine.trim());
+            }
+        }
+        
+        return extractContentFromGeminiResponse(response.toString());
+    }
+    
+    // Les autres méthodes restent inchangées...
+    private static String buildGeminiJsonRequest(String prompt) {
+        String escapedPrompt = escapeJsonString(prompt);
+        
+        return "{"
+            + "\"contents\":["
+                + "{"
+                    + "\"parts\":["
+                        + "{"
+                            + "\"text\":\"" + escapedPrompt + "\""
+                        + "}"
+                    + "]"
+                + "}"
+            + "],"
+            + "\"generationConfig\":{"
+                + "\"temperature\":0.1,"
+                + "\"maxOutputTokens\":10"
+            + "}"
+            + "}";
+    }
+    
+    private static String escapeJsonString(String str) {
+        return str.replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
+                  .replace("\n", "\\n")
+                  .replace("\r", "\\r")
+                  .replace("\t", "\\t");
+    }
+    
+    private static String extractContentFromGeminiResponse(String jsonResponse) {
+        try {
+            // Recherche simple du texte dans la réponse JSON
+            int textStart = jsonResponse.indexOf("\"text\":\"");
+            if (textStart == -1) {
+                textStart = jsonResponse.indexOf("\"text\": \"");
+                if (textStart == -1) {
+                    throw new RuntimeException("Texte non trouvé dans la réponse Gemini");
+                }
+                textStart += 9;
+            } else {
+                textStart += 8;
+            }
+            
+            int textEnd = jsonResponse.indexOf("\"", textStart);
+            if (textEnd == -1) {
+                throw new RuntimeException("Fin du texte non trouvée");
+            }
+            
+            String content = jsonResponse.substring(textStart, textEnd);
+            return content.replace("\\n", "\n")
+                         .replace("\\\"", "\"")
+                         .replace("\\\\", "\\")
+                         .trim();
+            
+        } catch (Exception e) {
+            System.err.println("Erreur lors du parsing JSON Gemini: " + e.getMessage());
+            return "0";
+        }
+    }
+    
+    private static double extractPercentageFromResponse(String response) {
+        try {
+            System.out.println("Réponse brute de Gemini: " + response);
+            
+            // Nettoyer la réponse pour extraire uniquement le nombre
+            String cleanResponse = response.replaceAll("[^0-9.]", "").trim();
+            if (cleanResponse.isEmpty()) {
+                return 0.0;
+            }
+            
+            return Double.parseDouble(cleanResponse);
+        } catch (NumberFormatException e) {
+            System.err.println("Impossible de parser la réponse: " + response);
+            return 0.0;
+        }
+    }
+    
+    // Méthode pour tester la connexion API
+    public static boolean testAPIConnection() {
+        try {
+            String response = callGeminiAPI("Réponds juste: OK");
+            System.out.println("Test de connexion réussi. Réponse: " + response);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Test de connexion échoué: " + e.getMessage());
+            return false;
+        }
+    }

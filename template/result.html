@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Résultats des Tests</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .admin-sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="job-list.html"><i class="fas fa-briefcase me-2"></i>Portal Job - Admin</a>
+            <a href="job-list.html" class="btn btn-outline-light">
+                <i class="fas fa-home me-1"></i>Retour au site
+            </a>
+        </div>
+    </nav>
+
+    <div class="row g-0">
+        <div class="col-md-2">
+            <div class="admin-sidebar p-3">
+                <div class="text-white mb-4">
+                    <h5><i class="fas fa-cog me-2"></i>Administration</h5>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link text-white" href="admin-personnel.html">
+                        <i class="fas fa-users me-2"></i>Personnel
+                    </a>
+                    <a class="nav-link text-white" href="admin-candidates.html">
+                        <i class="fas fa-user-tie me-2"></i>Candidats
+                    </a>
+                    <a class="nav-link text-white" href="admin-interviews.html">
+                        <i class="fas fa-clipboard-check me-2"></i>Entretiens
+                    </a>
+                    <a class="nav-link text-white active" href="admin-results.html">
+                        <i class="fas fa-trophy me-2"></i>Résultats
+                    </a>
+                    <a class="nav-link text-white" href="admin-publish.html">
+                        <i class="fas fa-plus-circle me-2"></i>Publier une offre
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <div class="p-4">
+                <h2><i class="fas fa-trophy me-2"></i>Résultats des Tests</h2>
+                
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Classement par score global</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Rang</th>
+                                                <th>Candidat</th>
+                                                <th>Poste</th>
+                                                <th>Score Entretien</th>
+                                                <th>Score Tests</th>
+                                                <th>Score Global</th>
+                                                <th>Statut</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="table-success">
+                                                <td><span class="badge bg-warning text-dark">1er</span></td>
+                                                <td><strong>Jean Dupont</strong></td>
+                                                <td>Développeur Full Stack</td>
+                                                <td><span class="badge bg-success">18/20</span></td>
+                                                <td><span class="badge bg-success">17/20</span></td>
+                                                <td><span class="badge bg-success fs-6">17.5/20</span></td>
+                                                <td><span class="badge bg-primary">À valider</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-success me-1">
+                                                        <i class="fas fa-check"></i> Accepter
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-times"></i> Refuser
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><span class="badge bg-secondary">2ème</span></td>
+                                                <td><strong>Marie Martin</strong></td>
+                                                <td>Chef de Projet Marketing</td>
+                                                <td><span class="badge bg-success">16/20</span></td>
+                                                <td><span class="badge bg-success">15/20</span></td>
+                                                <td><span class="badge bg-success fs-6">15.5/20</span></td>
+                                                <td><span class="badge bg-primary">À valider</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-success me-1">
+                                                        <i class="fas fa-check"></i> Accepter
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-times"></i> Refuser
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><span class="badge bg-secondary">3ème</span></td>
+                                                <td><strong>Thomas Bernard</strong></td>
+                                                <td>Stagiaire Développeur Mobile</td>
+                                                <td><span class="badge bg-warning">14/20</span></td>
+                                                <td><span class="badge bg-success">16/20</span></td>
+                                                <td><span class="badge bg-warning fs-6">15/20</span></td>
+                                                <td><span class="badge bg-primary">À valider</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-success me-1">
+                                                        <i class="fas fa-check"></i> Accepter
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-times"></i> Refuser
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><span class="badge bg-light text-dark">4ème</span></td>
+                                                <td>Sophie Durand</td>
+                                                <td>Développeur Full Stack</td>
+                                                <td><span class="badge bg-warning">13/20</span></td>
+                                                <td><span class="badge bg-warning">12/20</span></td>
+                                                <td><span class="badge bg-warning fs-6">12.5/20</span></td>
+                                                <td><span class="badge bg-secondary">En attente</span></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-success me-1">
+                                                        <i class="fas fa-check"></i> Accepter
+                                                    </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-times"></i> Refuser
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

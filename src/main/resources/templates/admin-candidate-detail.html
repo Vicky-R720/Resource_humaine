@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Détail Candidat</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Navbar fixe en haut */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            height: 56px;
+        }
+
+        /* Sidebar fixe avec décalage pour la navbar */
+        .admin-sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: fixed;
+            width: 16.666667%;
+            top: 56px;
+            left: 0;
+            z-index: 1020;
+            overflow-y: auto;
+        }
+
+        /* Contenu principal avec décalage pour navbar et sidebar */
+        .main-content {
+            margin-left: 16.666667%;
+            margin-top: 56px;
+            width: 83.333333%;
+            min-height: calc(100vh - 56px);
+        }
+
+        /* Ajustement pour que le body n'ait pas de margin par défaut */
+        body {
+            padding-top: 0;
+        }
+
+        /* Classes existantes inchangées */
+        .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+        .info-card {
+            border-left: 4px solid #0d6efd;
+            transition: transform 0.2s;
+        }
+        .info-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .appliance-card {
+            border-left: 4px solid #28a745;
+        }
+        .badge-status {
+            font-size: 0.8rem;
+        }
+
+        /* Responsive pour petits écrans */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 100%;
+                position: static;
+                min-height: auto;
+                top: auto;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                margin-top: 56px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar fixe -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-briefcase me-2"></i>BeerBears - Admin
+            </a>
+            <a href="/admin/candidates" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- Sidebar fixe -->
+            <div class="admin-sidebar p-3">
+                <div class="text-white mb-4">
+                    <h5><i class="fas fa-cog me-2"></i>Administration</h5>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link text-white" href="/persons/appliances">
+                        <i class="fas fa-users me-2"></i>Dossier traité
+                    </a>
+                    <a class="nav-link text-white" href="/admin/candidates">
+                        <i class="fas fa-user-tie me-2"></i>Candidats
+                    </a>
+                      <a class="nav-link text-white" href="/persons/entretienPlanning">
+                        <i class="fas fa-user-tie me-2"></i>en attente d'entretien
+                    </a>
+
+                </nav>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="main-content">
+                <div class="p-4">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="mb-1">
+                                <i class="fas fa-user-tie me-2 text-primary"></i>
+                                <span th:text="${candidate.prenom + ' ' + candidate.nom}">Nom Prénom</span>
+                            </h2>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-calendar me-1"></i>
+                                Dernière candidature: 
+                                <span th:text="${lastApplianceDate}">Aucune</span>
+                            </p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a th:href="@{'mailto:' + ${candidate.contact}}" class="btn btn-primary">
+                                <i class="fas fa-envelope me-1"></i>Contacter
+                            </a>
+                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="fas fa-trash me-1"></i>Supprimer
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Informations personnelles -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card info-card h-100">
+                                <div class="card-header bg-transparent">
+                                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informations Personnelles</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4 fw-bold">Nom complet:</div>
+                                        <div class="col-sm-8" th:text="${candidate.prenom + ' ' + candidate.nom}">Jean Dupont</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4 fw-bold">Contact:</div>
+                                        <div class="col-sm-8">
+                                            <a th:href="@{'mailto:' + ${candidate.contact}}" th:text="${candidate.contact}">jean.dupont@email.com</a>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-sm-4 fw-bold">Âge:</div>
+                                        <div class="col-sm-8" th:text="${candidate.age + ' ans'}">28 ans</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4 fw-bold">Total candidatures:</div>
+                                        <div class="col-sm-8">
+                                            <span class="badge bg-primary" th:text="${appliances != null ? appliances.size() : 0}">3</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card info-card h-100">
+                                <div class="card-header bg-transparent">
+                                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Statistiques</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-6 fw-bold">Candidatures actives:</div>
+                                        <div class="col-sm-6">
+                                            <span class="badge bg-success" th:text="${appliances != null ? appliances.size() : 0}">3</span>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-sm-6 fw-bold">Première candidature:</div>
+                                        <div class="col-sm-6" th:if="${appliances != null and !appliances.empty}">
+                                            <span th:text="${#temporals.format(appliances.get(appliances.size()-1).createdAt, 'dd/MM/yyyy')}">15/08/2025</span>
+                                        </div>
+                                        <div class="col-sm-6" th:unless="${appliances != null and !appliances.empty}">
+                                            Aucune
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6 fw-bold">Dernière mise à jour:</div>
+                                        <div class="col-sm-6" th:if="${appliances != null and !appliances.empty}">
+                                            <span th:text="${#temporals.format(appliances.get(0).createdAt, 'dd/MM/yyyy')}">20/09/2025</span>
+                                        </div>
+                                        <div class="col-sm-6" th:unless="${appliances != null and !appliances.empty}">
+                                            Aucune
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liste des candidatures -->
+                    <div class="card">
+                        <div class="card-header bg-transparent">
+                            <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Candidatures</h5>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${appliances != null and !appliances.empty}">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Poste</th>
+                                                <th>Entreprise</th>
+                                                <th>Type de contrat</th>
+                                                <th>Date de candidature</th>
+                                                <th>CV</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="appliance : ${appliances}" class="appliance-card">
+                                                <td th:text="${appliance.offer.post.name}">Maître Brasseur</td>
+                                                <td th:text="${appliance.offer.companyName}">Distillerie des Hauts Plateaux</td>
+                                                <td>
+                                                    <span class="badge bg-info badge-status" 
+                                                          th:text="${appliance.offer.contractType.name}">CDI</span>
+                                                </td>
+                                                <td th:text="${#temporals.format(appliance.createdAt, 'dd/MM/yyyy HH:mm')}">20/09/2025 14:30</td>
+                                                <td>
+                                                    <a th:if="${appliance.cvLink != null}" 
+                                                       th:href="${appliance.cvLink}" 
+                                                       target="_blank" 
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-download me-1"></i>CV
+                                                    </a>
+                                                    <span th:unless="${appliance.cvLink != null}" class="text-muted">Aucun</span>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-info">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-warning ms-1">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div th:unless="${appliances != null and !appliances.empty}" class="text-center py-4">
+                                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Aucune candidature</h5>
+                                <p class="text-muted">Ce candidat n'a postulé à aucune offre pour le moment.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section démo pour tester le scroll -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de suppression -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer le candidat 
+                       <strong th:text="${candidate.prenom + ' ' + candidate.nom}">Jean Dupont</strong> ?</p>
+                    <p class="text-danger">Cette action est irréversible et supprimera également toutes ses candidatures.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form th:action="@{'/admin/api/candidates/' + ${candidate.id}}" method="POST">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Liste des Candidatures</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Navbar fixe en haut */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            height: 56px;
+        }
+
+        /* Sidebar fixe avec décalage pour la navbar */
+        .admin-sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: fixed;
+            width: 16.666667%;
+            top: 56px;
+            left: 0;
+            z-index: 1020;
+            overflow-y: auto;
+        }
+
+        /* Contenu principal avec décalage pour navbar et sidebar */
+        .main-content {
+            margin-left: 16.666667%;
+            margin-top: 56px;
+            width: 83.333333%;
+            min-height: calc(100vh - 56px);
+        }
+
+        body {
+            padding-top: 0;
+        }
+
+        .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 8px;
+        }
+
+        .appliance-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            border-left: 4px solid #007bff;
+        }
+
+        .appliance-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .match-score {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .match-high { color: #28a745; }
+        .match-medium { color: #ffc107; }
+        .match-low { color: #dc3545; }
+
+        .progress {
+            height: 8px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-en_cours { background-color: #fff3cd; color: #856404; }
+        .status-accepte { background-color: #d4edda; color: #155724; }
+        .status-refuse { background-color: #f8d7da; color: #721c24; }
+        .status-en_attente { background-color: #e2e3e5; color: #383d41; }
+
+        .filter-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #dee2e6;
+        }
+
+        .info-personal {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .offer-info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .candidate-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Responsive pour petits écrans */
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 100%;
+                position: static;
+                min-height: auto;
+                top: auto;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                margin-top: 56px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar fixe -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-briefcase me-2"></i>BeerBears - Admin
+            </a>
+            <div class="d-flex">
+                <a class="btn btn-light me-2" href="/persons/verificationPlanning">
+                    <i class="fas fa-users me-1"></i>Lancer
+                </a>
+                <a href="/offers" class="btn btn-light me-2">
+                    <i class="fas fa-briefcase me-1"></i>Offres
+                </a>
+                <a href="/" class="btn btn-outline-light">
+                    <i class="fas fa-home me-1"></i>Retour au site
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- Sidebar fixe -->
+            <div class="admin-sidebar p-3">
+                <div class="text-white mb-4">
+                    <h5><i class="fas fa-cog me-2"></i>Administration</h5>
+                </div>
+                <nav class="nav flex-column">
+                   <a class="nav-link text-white" href="/persons/appliances">
+                        <i class="fas fa-users me-2"></i>Dossier Trier
+                    </a>
+                    <a class="nav-link text-white" href="/admin/candidates">
+                        <i class="fas fa-user-tie me-2"></i>Candidats
+                    </a>
+                    <a class="nav-link text-white" href="/persons/entretienPlanning">
+                        <i class="fas fa-user-tie me-2"></i>en attente d'entretien
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="main-content">
+                <div class="container mt-4">
+                    <!-- Section des filtres -->
+                    <div class="filter-section">
+                        <h4 class="filter-title">
+                            <i class="fas fa-filter"></i>
+                            Filtres des candidatures
+                        </h4>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="filter-group">
+                                    <label for="statusFilter">Statut</label>
+                                    <select class="form-select" id="statusFilter">
+                                        <option value="">Tous les statuts</option>
+                                        <option value="en_cours">En cours</option>
+                                        <option value="accepte">Accepté</option>
+                                        <option value="refuse">Refusé</option>
+                                        <option value="en_attente">En attente</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="filter-group">
+                                    <label for="scoreFilter">Score matching</label>
+                                    <select class="form-select" id="scoreFilter">
+                                        <option value="">Tous les scores</option>
+                                        <option value="80-100">Excellent (80-100%)</option>
+                                        <option value="60-79">Bon (60-79%)</option>
+                                        <option value="40-59">Moyen (40-59%)</option>
+                                        <option value="0-39">Faible (0-39%)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="filter-group">
+                                    <label for="dateFilter">Date</label>
+                                    <select class="form-select" id="dateFilter">
+                                        <option value="">Toutes dates</option>
+                                        <option value="today">Aujourd'hui</option>
+                                        <option value="week">Cette semaine</option>
+                                        <option value="month">Ce mois</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="filter-group">
+                                    <label for="offerFilter">Offre</label>
+                                    <input type="text" class="form-control" id="offerFilter" placeholder="Nom de l'offre...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <a href="#" class="reset-filters" onclick="resetFilters()">
+                                <i class="fas fa-undo me-1"></i>Réinitialiser les filtres
+                            </a>
+                            <button class="btn btn-primary" onclick="applyFilters()">
+                                <i class="fas fa-search me-1"></i>Appliquer les filtres
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-file-alt me-2 text-primary"></i>Liste des Candidatures</h2>
+                        <span class="badge bg-primary fs-6" th:text="${#lists.size(appliances)} + ' candidature(s) trouvée(s)'">0 candidatures</span>
+                    </div>
+
+                    <!-- Message si aucune candidature -->
+                    <div th:if="${#lists.isEmpty(appliances)}" class="alert alert-info text-center">
+                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                        <h4>Aucune candidature trouvée</h4>
+                        <p>Aucune candidature n'a été soumise pour le moment.</p>
+                    </div>
+
+                    <!-- Liste des candidatures -->
+                    <div th:each="appliance : ${appliances}" class="card appliance-card mb-4" data-appliance>
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <!-- Colonne Candidat -->
+                                <div class="col-md-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="candidate-photo me-3">
+                                            <span th:text="${#strings.substring(appliance.person.prenom ?: '', 0, 1) + #strings.substring(appliance.person.nom ?: '', 0, 1)}">AB</span>
+                                        </div>
+                                        <div>
+                                            <h5 class="card-title text-primary mb-1" 
+                                                th:text="${appliance.person.prenom} + ' ' + ${appliance.person.nom}">
+                                                Nom Prénom
+                                            </h5>
+                                            <p class="text-muted mb-1">
+                                                <i class="fas fa-envelope me-1"></i>
+                                                <span th:text="${appliance.person.contact ?: 'Contact non renseigné'}">Email</span>
+                                            </p>
+                                            <p class="text-muted mb-0">
+                                                <i class="fas fa-phone me-1"></i>
+                                                <span th:if="${appliance.person.contact != null and #strings.length(appliance.person.contact) > 5}">
+                                                    <span th:text="${appliance.person.contact}">Téléphone</span>
+                                                </span>
+                                                <span th:unless="${appliance.person.contact != null and #strings.length(appliance.person.contact) > 5}">
+                                                    Téléphone non renseigné
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Colonne Offre -->
+                                <div class="col-md-3">
+                                    <div class="offer-info">
+                                        <h6 class="mb-2"><i class="fas fa-briefcase me-2"></i>Offre</h6>
+                                        <p class="mb-1" th:text="${appliance.offer?.post?.name ?: 'Poste non spécifié'}">Poste</p>
+                                        <p class="mb-1 text-muted small" th:text="${appliance.offer?.companyName ?: 'Entreprise non spécifiée'}">Entreprise</p>
+                                        <p class="mb-0 text-muted small" th:text="${appliance.offer?.location ?: 'Lieu non spécifié'}">Lieu</p>
+                                    </div>
+                                </div>
+
+                                <!-- Colonne Statut -->
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <!-- Statut -->
+                                        <span class="status-badge" 
+                                              th:classappend="'status-' + ${appliance.traitement}"
+                                              th:text="${appliance.traitement ?: 'Non traité'}">
+                                            Statut
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Colonne Actions -->
+                                <div class="col-md-2 text-end">
+                                    <div class="btn-group-vertical w-100">
+                                        <button class="btn btn-outline-primary btn-sm mb-1" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#applianceModal"
+                                                th:attr="data-id=${appliance.id}, data-candidate=${appliance.person.prenom + ' ' + appliance.person.nom}, data-offer=${appliance.offer?.post?.name}, data-score=${matchingScores[appliance.id]}, data-status=${appliance.traitement}"
+                                                onclick="showApplianceDetails(this)">
+                                            <i class="fas fa-eye me-1"></i>Détails
+                                        </button>
+                                        
+                                        <button class="btn btn-outline-success btn-sm mb-1"
+                                                th:if="${appliance.traitement != 'accepte'}"
+                                                th:attr="data-id=${appliance.id}"
+                                                onclick="updateStatus(this.getAttribute('data-id'), 'accepte')">
+                                            <i class="fas fa-check me-1"></i>Accepter
+                                        </button>
+                                        
+                                        <button class="btn btn-outline-danger btn-sm mb-1"
+                                                th:if="${appliance.traitement != 'refuse'}"
+                                                th:attr="data-id=${appliance.id}"
+                                                onclick="updateStatus(this.getAttribute('data-id'), 'refuse')">
+                                            <i class="fas fa-times me-1"></i>Refuser
+                                        </button>
+                                        
+                                        <a th:href="@{'/appliances/' + ${appliance.id} + '/cv'}" 
+                                           class="btn btn-outline-info btn-sm"
+                                           th:if="${appliance.cvLink != null}">
+                                            <i class="fas fa-download me-1"></i>CV
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informations supplémentaires -->
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <div class="info-personal">
+                                        <h6 class="mb-2"><i class="fas fa-graduation-cap me-2"></i>Formation</h6>
+                                        <div th:if="${appliance.academicalQualifications != null and !appliance.academicalQualifications.isEmpty()}">
+                                            <p class="mb-1" th:text="${appliance.academicalQualifications[0].diploma?.name ?: 'Diplôme non spécifié'}">Diplôme</p>
+                                            <p class="mb-0 text-muted small" th:text="${appliance.academicalQualifications[0].sector?.name ?: 'Secteur non spécifié'}">Secteur</p>
+                                        </div>
+                                        <div th:unless="${appliance.academicalQualifications != null and !appliance.academicalQualifications.isEmpty()}">
+                                            <p class="text-muted mb-0">Aucune formation renseignée</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-personal">
+                                        <h6 class="mb-2"><i class="fas fa-code me-2"></i>Compétences</h6>
+                                        <p class="mb-0" th:if="${appliance.skills != null}" th:text="${#strings.abbreviate(appliance.skills, 100)}">Compétences</p>
+                                        <p class="text-muted mb-0" th:unless="${appliance.skills != null}">Aucune compétence renseignée</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour les détails de la candidature -->
+    <div class="modal fade" id="applianceModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Détails de la Candidature</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="applianceModalBody">
+                    <!-- Contenu chargé dynamiquement -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showApplianceDetails(button) {
+            const id = button.getAttribute('data-id');
+            const candidate = button.getAttribute('data-candidate');
+            const offer = button.getAttribute('data-offer');
+            const score = button.getAttribute('data-score');
+            const status = button.getAttribute('data-status');
+            
+            document.getElementById('applianceModalBody').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-user-tie me-2"></i>Candidat</h6>
+                        <div class="info-personal">
+                            <p><strong>Nom:</strong> ${candidate}</p>
+                            <p><strong>Score matching:</strong> <span class="match-high">${score}%</span></p>
+                            <p><strong>Statut:</strong> <span class="status-badge status-${status}">${status}</span></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-briefcase me-2"></i>Offre</h6>
+                        <div class="offer-info">
+                            <p><strong>Poste:</strong> ${offer}</p>
+                            <p><strong>Date candidature:</strong> ${new Date().toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h6><i class="fas fa-info-circle me-2"></i>Informations détaillées</h6>
+                    <p>Les informations complètes de la candidature seront affichées ici.</p>
+                </div>
+            `;
+        }
+
+        function updateStatus(applianceId, status) {
+            if (confirm('Êtes-vous sûr de vouloir modifier le statut de cette candidature ?')) {
+                fetch('/appliances/' + applianceId + '/status?status=' + status, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('Erreur lors de la mise à jour du statut');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Erreur lors de la mise à jour du statut');
+                });
+            }
+        }
+
+        function applyFilters() {
+            const status = document.getElementById('statusFilter').value;
+            const score = document.getElementById('scoreFilter').value;
+            const date = document.getElementById('dateFilter').value;
+            const offer = document.getElementById('offerFilter').value.toLowerCase();
+
+            const appliances = document.querySelectorAll('[data-appliance]');
+            let visibleCount = 0;
+
+            appliances.forEach(appliance => {
+                let show = true;
+
+                if (status && appliance.querySelector('.status-badge').textContent !== status) {
+                    show = false;
+                }
+
+                if (show) {
+                    appliance.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    appliance.style.display = 'none';
+                }
+            });
+
+            document.querySelector('.badge').textContent = `${visibleCount} candidature(s) trouvée(s)`;
+        }
+
+        function resetFilters() {
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('scoreFilter').value = '';
+            document.getElementById('dateFilter').value = '';
+            document.getElementById('offerFilter').value = '';
+            applyFilters();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            applyFilters();
+        });
+    </script>
+</body>
+</html>

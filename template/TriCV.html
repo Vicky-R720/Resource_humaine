@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Job - Liste des Candidats</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .candidate-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            cursor: pointer;
+        }
+
+        .match-score {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .match-high { color: #28a745; }
+        .match-medium { color: #ffc107; }
+        .match-low { color: #dc3545; }
+
+        .progress {
+            height: 8px;
+        }
+
+        .candidate-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .skill-badge {
+            font-size: 0.75rem;
+            margin: 0.125rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-users me-2"></i>Portal Job - Candidats
+            </a>
+            <div class="d-flex">
+                <a href="#" class="btn btn-light me-2">
+                    <i class="fas fa-plus me-1"></i>Ajouter Candidat
+                </a>
+                <a href="#" class="btn btn-light">
+                    <i class="fas fa-cog me-1"></i>Admin
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Filtres -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-filter me-2"></i>Filtres</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="filterForm">
+                            <div class="mb-3">
+                                <label class="form-label">Âge</label>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input type="number" class="form-control form-control-sm" name="ageMin" placeholder="Min" min="18" max="65" onchange="filterCandidates()">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" class="form-control form-control-sm" name="ageMax" placeholder="Max" min="18" max="65" onchange="filterCandidates()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Expérience (années)</label>
+                                <select class="form-select" name="experience" onchange="filterCandidates()">
+                                    <option value="">Toute expérience</option>
+                                    <option value="0-1">0-1 an</option>
+                                    <option value="2-3">2-3 ans</option>
+                                    <option value="4-5">4-5 ans</option>
+                                    <option value="6-10">6-10 ans</option>
+                                    <option value="10+">Plus de 10 ans</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Niveau de diplôme</label>
+                                <select class="form-select" name="diploma" onchange="filterCandidates()">
+                                    <option value="">Tous niveaux</option>
+                                    <option value="Bac">Baccalauréat</option>
+                                    <option value="Bac+2">Bac+2</option>
+                                    <option value="Bac+3">Bac+3 (Licence)</option>
+                                    <option value="Bac+5">Bac+5 (Master)</option>
+                                    <option value="Bac+8">Bac+8 (Doctorat)</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Localisation</label>
+                                <select class="form-select" name="location" onchange="filterCandidates()">
+                                    <option value="">Toutes les villes</option>
+                                    <option value="Paris">Paris</option>
+                                    <option value="Lyon">Lyon</option>
+                                    <option value="Marseille">Marseille</option>
+                                    <option value="Toulouse">Toulouse</option>
+                                    <option value="Nice">Nice</option>
+                                    <option value="Bordeaux">Bordeaux</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Score CV minimum (%)</label>
+                                <input type="range" class="form-range" name="minScore" min="0" max="100" value="0" oninput="updateScoreLabel(this.value)" onchange="filterCandidates()">
+                                <div class="d-flex justify-content-between">
+                                    <small>0%</small>
+                                    <small id="scoreLabel">0%</small>
+                                    <small>100%</small>
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-outline-secondary btn-sm w-100" onclick="resetFilters()">
+                                <i class="fas fa-times me-1"></i>Réinitialiser
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des candidats -->
+            <div class="col-md-9">
+                <div id="candidatesContainer">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2>Liste des Candidats</h2>
+                        <span class="badge bg-primary fs-6" id="candidateCount">12 candidat(s) trouvé(s)</span>
+                    </div>
+
+                    <!-- Candidat 1 -->
+                    <div class="card candidate-card mb-3" data-age="28" data-experience="3" data-diploma="Bac+5" data-location="Paris" data-score="92">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-1">
+                                    <img src="https://via.placeholder.com/60x60?text=JD" alt="Photo" class="candidate-photo">
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="card-title text-primary mb-1">Jean Dupont</h5>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-briefcase me-1"></i>
+                                        Développeur Full Stack Senior
+                                    </p>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt me-1"></i>Paris
+                                        <i class="fas fa-birthday-cake me-1 ms-3"></i>28 ans
+                                        <i class="fas fa-clock me-1 ms-3"></i>3 ans d'exp.
+                                    </p>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-graduation-cap me-1"></i>Master en Informatique (Bac+5)
+                                    </p>
+                                    <div>
+                                        <span class="badge bg-secondary skill-badge">React</span>
+                                        <span class="badge bg-secondary skill-badge">Node.js</span>
+                                        <span class="badge bg-secondary skill-badge">Python</span>
+                                        <span class="badge bg-secondary skill-badge">MySQL</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="match-score match-high">92%</div>
+                                        <small class="text-muted">CV Matching</small>
+                                        <div class="progress mt-2">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 92%"></div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i>Excellent match
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <div class="btn-group-vertical">
+                                        <button class="btn btn-success btn-sm mb-1">
+                                            <i class="fas fa-eye"></i> Voir CV
+                                        </button>
+                                        <button class="btn btn-primary btn-sm mb-1">
+                                            <i class="fas fa-envelope"></i> Contacter
+                                        </button>
+                                        <button class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-star"></i> Favoris
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Candidat 2 -->
+                    <div class="card candidate-card mb-3" data-age="32" data-experience="7" data-diploma="Bac+3" data-location="Lyon" data-score="85">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-1">
+                                    <img src="https://via.placeholder.com/60x60?text=MR" alt="Photo" class="candidate-photo">
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="card-title text-primary mb-1">Marie Robert</h5>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-briefcase me-1"></i>
+                                        Chef de Projet Digital
+                                    </p>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt me-1"></i>Lyon
+                                        <i class="fas fa-birthday-cake me-1 ms-3"></i>32 ans
+                                        <i class="fas fa-clock me-1 ms-3"></i>7 ans d'exp.
+                                    </p>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-graduation-cap me-1"></i>Licence en Communication (Bac+3)
+                                    </p>
+                                    <div>
+                                        <span class="badge bg-secondary skill-badge">Gestion de projet</span>
+                                        <span class="badge bg-secondary skill-badge">Scrum</span>
+                                        <span class="badge bg-secondary skill-badge">Marketing digital</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="match-score match-medium">85%</div>
+                                        <small class="text-muted">CV Matching</small>
+                                        <div class="progress mt-2">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 85%"></div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-warning">
+                                                <i class="fas fa-exclamation-circle me-1"></i>Bon match
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <div class="btn-group-vertical">
+                                        <button class="btn btn-success btn-sm mb-1">
+                                            <i class="fas fa-eye"></i> Voir CV
+                                        </button>
+                                        <button class="btn btn-primary btn-sm mb-1">
+                                            <i class="fas fa-envelope"></i> Contacter
+                                        </button>
+                                        <button class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-star"></i> Favoris
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Candidat 3 -->
+                    <div class="card candidate-card mb-3" data-age="25" data-experience="1" data-diploma="Bac+5" data-location="Marseille" data-score="78">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-1">
+                                    <img src="https://via.placeholder.com/60x60?text=PL" alt="Photo" class="candidate-photo">
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="card-title text-primary mb-1">Pierre Lefebvre</h5>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-briefcase me-1"></i>
+                                        Développeur Junior Java
+                                    </p>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt me-1"></i>Marseille
+                                        <i class="fas fa-birthday-cake me-1 ms-3"></i>25 ans
+                                        <i class="fas fa-clock me-1 ms-3"></i>1 an d'exp.
+                                    </p>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-graduation-cap me-1"></i>Master en Génie Logiciel (Bac+5)
+                                    </p>
+                                    <div>
+                                        <span class="badge bg-secondary skill-badge">Java</span>
+                                        <span class="badge bg-secondary skill-badge">Spring Boot</span>
+                                        <span class="badge bg-secondary skill-badge">PostgreSQL</span>
+                                        <span class="badge bg-secondary skill-badge">Git</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="match-score match-medium">78%</div>
+                                        <small class="text-muted">CV Matching</small>
+                                        <div class="progress mt-2">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 78%"></div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-warning">
+                                                <i class="fas fa-exclamation-circle me-1"></i>Bon match
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <div class="btn-group-vertical">
+                                        <button class="btn btn-success btn-sm mb-1">
+                                            <i class="fas fa-eye"></i> Voir CV
+                                        </button>
+                                        <button class="btn btn-primary btn-sm mb-1">
+                                            <i class="fas fa-envelope"></i> Contacter
+                                        </button>
+                                        <button class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-star"></i> Favoris
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Candidat 4 -->
+                    <div class="card candidate-card mb-3" data-age="45" data-experience="15" data-diploma="Bac+5" data-location="Toulouse" data-score="95">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-1">
+                                    <img src="https://via.placeholder.com/60x60?text=AM" alt="Photo" class="candidate-photo">
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="card-title text-primary mb-1">Anne Martin</h5>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-briefcase me-1"></i>
+                                        Directrice Technique Senior
+                                    </p>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-map-marker-alt me-1"></i>Toulouse
+                                        <i class="fas fa-birthday-cake me-1 ms-3"></i>45 ans
+                                        <i class="fas fa-clock me-1 ms-3"></i>15+ ans d'exp.
+                                    </p>
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-graduation-cap me-1"></i>Master en Architecture Logicielle (Bac+5)
+                                    </p>
+                                    <div>
+                                        <span class="badge bg-secondary skill-badge">Architecture</span>
+                                        <span class="badge bg-secondary skill-badge">Leadership</span>
+                                        <span class="badge bg-secondary skill-badge">DevOps</span>
+                                        <span class="badge bg-secondary skill-badge">Cloud AWS</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="text-center">
+                                        <div class="match-score match-high">95%</div>
+                                        <small class="text-muted">CV Matching</small>
+                                        <div class="progress mt-2">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: 95%"></div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-success">
+                                                <i class="fas fa-check-circle me-1"></i>Excellent match
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <div class="btn-group-vertical">
+                                        <button class="btn btn-success btn-sm mb-1">
+                                            <i class="fas fa-eye"></i> Voir CV
+                                        </button>
+                                        <button class="btn btn-primary btn-sm mb-1">
+                                            <i class="fas fa-envelope"></i> Contacter
+                                        </button>
+                                        <button class="btn btn-warning btn-sm">
+                                            <i class="fas fa-star"></i> Favoris
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message si aucun candidat -->
+                    <div id="noCandidates" class="alert alert-info text-center" style="display: none;">
+                        <h4>Aucun candidat ne correspond à vos critères</h4>
+                        <p>Essayez de modifier vos filtres pour obtenir plus de résultats.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateScoreLabel(value) {
+            document.getElementById('scoreLabel').textContent = value + '%';
+        }
+
+        function filterCandidates() {
+            const form = document.getElementById('filterForm');
+            const formData = new FormData(form);
+            
+            const filters = {
+                ageMin: parseInt(formData.get('ageMin')) || 0,
+                ageMax: parseInt(formData.get('ageMax')) || 100,
+                experience: formData.get('experience'),
+                diploma: formData.get('diploma'),
+                location: formData.get('location'),
+                minScore: parseInt(formData.get('minScore')) || 0
+            };
+
+            const candidates = document.querySelectorAll('.candidate-card');
+            let visibleCount = 0;
+
+            candidates.forEach(candidate => {
+                const age = parseInt(candidate.dataset.age);
+                const experience = parseInt(candidate.dataset.experience);
+                const diploma = candidate.dataset.diploma;
+                const location = candidate.dataset.location;
+                const score = parseInt(candidate.dataset.score);
+
+                let show = true;
+
+                // Filtre âge
+                if (age < filters.ageMin || age > filters.ageMax) {
+                    show = false;
+                }
+
+                // Filtre expérience
+                if (filters.experience) {
+                    const expRange = filters.experience;
+                    if (expRange === '0-1' && experience > 1) show = false;
+                    if (expRange === '2-3' && (experience < 2 || experience > 3)) show = false;
+                    if (expRange === '4-5' && (experience < 4 || experience > 5)) show = false;
+                    if (expRange === '6-10' && (experience < 6 || experience > 10)) show = false;
+                    if (expRange === '10+' && experience <= 10) show = false;
+                }
+
+                // Filtre diplôme
+                if (filters.diploma && diploma !== filters.diploma) {
+                    show = false;
+                }
+
+                // Filtre localisation
+                if (filters.location && location !== filters.location) {
+                    show = false;
+                }
+
+                // Filtre score minimum
+                if (score < filters.minScore) {
+                    show = false;
+                }
+
+                if (show) {
+                    candidate.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    candidate.style.display = 'none';
+                }
+            });
+
+            // Mise à jour du compteur
+            document.getElementById('candidateCount').textContent = visibleCount + ' candidat(s) trouvé(s)';
+            
+            // Afficher/masquer le message "aucun candidat"
+            document.getElementById('noCandidates').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        function resetFilters() {
+            document.getElementById('filterForm').reset();
+            document.getElementById('scoreLabel').textContent = '0%';
+            filterCandidates();
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            filterCandidates();
+        });
+    </script>
+</body>
+
+</html>
