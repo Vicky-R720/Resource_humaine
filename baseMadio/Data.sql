@@ -1,37 +1,36 @@
 --
--- PostgreSQL Database - Données RH
--- Base de données: Orinasa Malagasy - Données pour les nouvelles tables RH
+-- PostgreSQL Database - Donnees RH
+-- Base de donnees: Orinasa Malagasy - Donnees pour les nouvelles tables RH
 --
 
 SET client_encoding = 'UTF8';
 
 -- ============================================================
--- DONNÉES POUR LES NOUVELLES TABLES RH
+-- DONNeES POUR LES NOUVELLES TABLES RH
 -- ============================================================
 
 -- ============================================================
--- 1. PERSONNEL_RH (Fiches employés)
+-- 1. PERSONNEL_RH (Fiches employes)
 -- ============================================================
+
 INSERT INTO public.personnel_rh (
     person_id, post_id, matricule, cin, cin_date_delivery, cin_place_delivery, 
     sexe, situation_familiale, nombre_enfants, lieu_naissance,
     personne_urgence_nom, personne_urgence_contact, personne_urgence_lien,
     rib, banque, numero_cnaps, numero_ostie, date_embauche, statut
 ) VALUES
-(1, 1, 'EMP001', '101234567890', '2005-03-10', 'Antananarivo', 'M', 'Marié(e)', 2, 'Antananarivo', 'Rakoto Marie', '034 12 345 67', 'Épouse', '00012345678901234567', 'BNI Madagascar', 'CNAPS001', 'OSTIE001', '2010-01-15', 'actif'),
-(2, 2, 'EMP002', '101234567891', '2010-06-15', 'Fianarantsoa', 'F', 'Célibataire', 0, 'Fianarantsoa', 'Rasoa Paul', '033 23 456 78', 'Frère', '00012345678901234568', 'BOA Madagascar', 'CNAPS002', 'OSTIE002', '2015-03-20', 'actif'),
-(3, 9, 'EMP003', '101234567892', '2002-10-20', 'Toamasina', 'M', 'Marié(e)', 3, 'Toamasina', 'Randria Alice', '032 34 567 89', 'Épouse', '00012345678901234569', 'BFV-SG', 'CNAPS003', 'OSTIE003', '2008-06-10', 'actif'),
-(4, 5, 'EMP004', '101234567893', '2008-04-05', 'Antsirabe', 'F', 'Divorcé(e)', 1, 'Antsirabe', 'Razafy Jean', '034 45 678 90', 'Ex-conjoint', '00012345678901234570', 'BNI Madagascar', 'CNAPS004', 'OSTIE004', '2012-09-01', 'actif'),
-(5, 6, 'EMP005', '101234567894', '2012-08-25', 'Toliara', 'M', 'Célibataire', 0, 'Toliara', 'Andriamalala Jeanne', '033 56 789 01', 'Mère', '00012345678901234571', 'BOA Madagascar', 'CNAPS005', 'OSTIE005', '2018-02-15', 'actif'),
-(6, 8, 'EMP006', '101234567895', '2007-06-10', 'Mahajanga', 'F', 'Marié(e)', 1, 'Mahajanga', 'Rajaona Marc', '032 67 890 12', 'Époux', '00012345678901234572', 'BFV-SG', 'CNAPS006', 'OSTIE006', '2013-11-20', 'actif'),
-(7, 7, 'EMP007', '101234567896', '2004-12-15', 'Nosy Be', 'M', 'Marié(e)', 2, 'Nosy Be', 'Randrianarisoa Sophie', '034 78 901 23', 'Épouse', '00012345678901234573', 'BNI Madagascar', 'CNAPS007', 'OSTIE007', '2011-05-10', 'actif'),
-(8, 10, 'EMP008', '101234567897', '2011-01-20', 'Antsiranana', 'F', 'Célibataire', 0, 'Antsiranana', 'Ramanantsoa Pierre', '033 89 012 34', 'Père', '00012345678901234574', 'BOA Madagascar', 'CNAPS008', 'OSTIE008', '2016-08-25', 'actif'),
-(9, 6, 'EMP009', '101234567898', '2006-08-05', 'Moramanga', 'M', 'Marié(e)', 1, 'Moramanga', 'Ravelonarivo Claire', '032 90 123 45', 'Épouse', '00012345678901234575', 'BFV-SG', 'CNAPS009', 'OSTIE009', '2014-04-15', 'actif'),
-(10, 6, 'EMP010', '101234567899', '2009-05-01', 'Ambatolampy', 'F', 'Célibataire', 0, 'Ambatolampy', 'Rasolofoniaina Jacques', '034 01 234 56', 'Frère', '00012345678901234576', 'BNI Madagascar', 'CNAPS010', 'OSTIE010', '2017-10-05', 'actif');
+(1, 1, 'EMP001', '101234567890', '2005-03-10', 'Antananarivo', 'M', 'Marie(e)', 2, 'Antananarivo', 'Rakoto Marie', '034 12 345 67', 'epouse', '00012345678901234567', 'BNI Madagascar', 'CNAPS001', 'OSTIE001', '2010-01-15', 'actif'),
+(2, 2, 'EMP002', '101234567891', '2010-06-15', 'Fianarantsoa', 'F', 'Celibataire', 0, 'Fianarantsoa', 'Rasoa Paul', '033 23 456 78', 'Frere', '00012345678901234568', 'BOA Madagascar', 'CNAPS002', 'OSTIE002', '2015-03-20', 'actif'),
+(3, 9, 'EMP003', '101234567892', '2002-10-20', 'Toamasina', 'M', 'Marie(e)', 3, 'Toamasina', 'Randria Alice', '032 34 567 89', 'epouse', '00012345678901234569', 'BFV-SG', 'CNAPS003', 'OSTIE003', '2008-06-10', 'actif'),
+(4, 5, 'EMP004', '101234567893', '2008-04-05', 'Antsirabe', 'F', 'Divorce(e)', 1, 'Antsirabe', 'Razafy Jean', '034 45 678 90', 'Ex-conjoint', '00012345678901234570', 'BNI Madagascar', 'CNAPS004', 'OSTIE004', '2012-09-01', 'actif'),
+(5, 6, 'EMP005', '101234567894', '2012-08-25', 'Toliara', 'M', 'Celibataire', 0, 'Toliara', 'Andriamalala Jeanne', '033 56 789 01', 'Mere', '00012345678901234571', 'BOA Madagascar', 'CNAPS005', 'OSTIE005', '2018-02-15', 'actif'),
+(6, 8, 'EMP006', '101234567895', '2007-06-10', 'Mahajanga', 'F', 'Marie(e)', 1, 'Mahajanga', 'Rajaona Marc', '032 67 890 12', 'epoux', '00012345678901234572', 'BFV-SG', 'CNAPS006', 'OSTIE006', '2013-11-20', 'actif'),
+(7, 7, 'EMP007', '101234567896', '2004-12-15', 'Nosy Be', 'M', 'Marie(e)', 2, 'Nosy Be', 'Randrianarisoa Sophie', '034 78 901 23', 'epouse', '00012345678901234573', 'BNI Madagascar', 'CNAPS007', 'OSTIE007', '2011-05-10', 'actif'),
+(8, 10, 'EMP008', '101234567897', '2011-01-20', 'Antsiranana', 'F', 'Celibataire', 0, 'Antsiranana', 'Ramanantsoa Pierre', '033 89 012 34', 'Pere', '00012345678901234574', 'BOA Madagascar', 'CNAPS008', 'OSTIE008', '2016-08-25', 'actif'),
+(9, 6, 'EMP009', '101234567898', '2006-08-05', 'Moramanga', 'M', 'Marie(e)', 1, 'Moramanga', 'Ravelonarivo Claire', '032 90 123 45', 'epouse', '00012345678901234575', 'BFV-SG', 'CNAPS009', 'OSTIE009', '2014-04-15', 'actif'),
+(10, 6, 'EMP010', '101234567899', '2009-05-01', 'Ambatolampy', 'F', 'Celibataire', 0, 'Ambatolampy', 'Rasolofoniaina Jacques', '034 01 234 56', 'Frere', '00012345678901234576', 'BNI Madagascar', 'CNAPS010', 'OSTIE010', '2017-10-05', 'actif');
 
--- ============================================================
--- 2. CONTRACTS_RH (Contrats)
--- ============================================================
+
 INSERT INTO public.contracts_rh (
     personnel_id, type_contrat, date_debut, date_fin, duree_essai_mois, 
     date_fin_essai, is_essai_valide, salaire_base, statut
@@ -47,22 +46,18 @@ INSERT INTO public.contracts_rh (
 (9, 'CDI', '2014-04-15', NULL, 3, '2014-07-15', TRUE, 1600000.00, 'actif'),
 (10, 'Stage', '2017-10-05', '2025-04-05', 1, '2017-11-05', TRUE, 800000.00, 'actif');
 
--- ============================================================
--- 3. LEAVE_TYPES_RH (Types de congés)
--- ============================================================
+
 INSERT INTO public.leave_types_rh (id, name, description, max_days_per_year, requires_justification, is_paid, color) VALUES
-(1, 'Congé payé', 'Congé annuel payé standard', 30, FALSE, TRUE, '#4CAF50'),
-(2, 'Congé maladie', 'Congé pour raison de santé', 15, TRUE, TRUE, '#FF9800'),
-(3, 'Congé maternité', 'Congé maternité (14 semaines)', 98, TRUE, TRUE, '#E91E63'),
-(4, 'Congé paternité', 'Congé paternité (3 jours)', 3, FALSE, TRUE, '#2196F3'),
-(5, 'Congé exceptionnel', 'Événements familiaux (mariage, décès)', 5, TRUE, TRUE, '#9C27B0'),
-(6, 'Congé sans solde', 'Congé sans rémunération', NULL, TRUE, FALSE, '#757575'),
-(7, 'RTT', 'Récupération temps de travail', 10, FALSE, TRUE, '#00BCD4'),
+(1, 'Conge paye', 'Conge annuel paye standard', 30, FALSE, TRUE, '#4CAF50'),
+(2, 'Conge maladie', 'Conge pour raison de sante', 15, TRUE, TRUE, '#FF9800'),
+(3, 'Conge maternite', 'Conge maternite (14 semaines)', 98, TRUE, TRUE, '#E91E63'),
+(4, 'Conge paternite', 'Conge paternite (3 jours)', 3, FALSE, TRUE, '#2196F3'),
+(5, 'Conge exceptionnel', 'evenements familiaux (mariage, deces)', 5, TRUE, TRUE, '#9C27B0'),
+(6, 'Conge sans solde', 'Conge sans remuneration', NULL, TRUE, FALSE, '#757575'),
+(7, 'RTT', 'Recuperation temps de travail', 10, FALSE, TRUE, '#00BCD4'),
 (8, 'Formation', 'Absence pour formation professionnelle', NULL, TRUE, TRUE, '#FF5722');
 
--- ============================================================
--- 4. LEAVE_BALANCE_RH (Soldes de congés 2025)
--- ============================================================
+
 INSERT INTO public.leave_balance_rh (personnel_id, leave_type_id, annee, solde_initial, solde_acquis, solde_pris, solde_restant) VALUES
 (1, 1, 2025, 5.0, 30.0, 12.0, 23.0),
 (1, 2, 2025, 0.0, 15.0, 3.0, 12.0),
@@ -80,37 +75,31 @@ INSERT INTO public.leave_balance_rh (personnel_id, leave_type_id, annee, solde_i
 (9, 1, 2025, 3.0, 30.0, 11.0, 22.0),
 (10, 1, 2025, 0.0, 15.0, 3.0, 12.0);
 
--- ============================================================
--- 5. LEAVE_REQUESTS_RH (Demandes de congés)
--- ============================================================
+
 INSERT INTO public.leave_requests_rh (personnel_id, leave_type_id, date_debut, date_fin, nombre_jours, motif, statut, validated_by, validation_date) VALUES
-(1, 1, '2025-12-20', '2025-12-31', 10.0, 'Vacances de fin d''année', 'approuve', 13, '2025-11-01 10:30:00'),
-(2, 1, '2025-08-01', '2025-08-15', 15.0, 'Congé été', 'approuve', 13, '2025-07-10 14:20:00'),
-(3, 2, '2025-09-10', '2025-09-12', 3.0, 'Grippe saisonnière', 'approuve', 13, '2025-09-11 09:00:00'),
-(4, 1, '2025-11-20', '2025-11-25', 5.0, 'Congé personnel', 'en_attente', NULL, NULL),
-(5, 1, '2025-12-15', '2025-12-20', 5.0, 'Fêtes de fin d''année', 'en_attente', NULL, NULL),
+(1, 1, '2025-12-20', '2025-12-31', 10.0, 'Vacances de fin d''annee', 'approuve', 13, '2025-11-01 10:30:00'),
+(2, 1, '2025-08-01', '2025-08-15', 15.0, 'Conge ete', 'approuve', 13, '2025-07-10 14:20:00'),
+(3, 2, '2025-09-10', '2025-09-12', 3.0, 'Grippe saisonniere', 'approuve', 13, '2025-09-11 09:00:00'),
+(4, 1, '2025-11-20', '2025-11-25', 5.0, 'Conge personnel', 'en_attente', NULL, NULL),
+(5, 1, '2025-12-15', '2025-12-20', 5.0, 'Fêtes de fin d''annee', 'en_attente', NULL, NULL),
 (6, 5, '2025-10-05', '2025-10-06', 2.0, 'Mariage', 'approuve', 13, '2025-09-20 11:45:00');
 
--- ============================================================
--- 6. SALARY_PARAMETERS_RH (Paramètres de paie Madagascar)
--- ============================================================
+
 INSERT INTO public.salary_parameters_rh (nom_parametre, description, valeur, type, categorie, date_debut_validite, is_active) VALUES
-('CNAPS_EMPLOYEE', 'Cotisation CNAPS employé', 1.00, 'pourcentage', 'cnaps', '2025-01-01', TRUE),
+('CNAPS_EMPLOYEE', 'Cotisation CNAPS employe', 1.00, 'pourcentage', 'cnaps', '2025-01-01', TRUE),
 ('CNAPS_EMPLOYER', 'Cotisation CNAPS employeur', 13.00, 'pourcentage', 'cnaps', '2025-01-01', TRUE),
-('OSTIE_EMPLOYEE', 'Cotisation OSTIE employé', 1.00, 'pourcentage', 'ostie', '2025-01-01', TRUE),
+('OSTIE_EMPLOYEE', 'Cotisation OSTIE employe', 1.00, 'pourcentage', 'ostie', '2025-01-01', TRUE),
 ('OSTIE_EMPLOYER', 'Cotisation OSTIE employeur', 5.00, 'pourcentage', 'ostie', '2025-01-01', TRUE),
 ('IRSA_TAUX_1', 'IRSA tranche 1 (0-350000)', 0.00, 'pourcentage', 'irsa', '2025-01-01', TRUE),
 ('IRSA_TAUX_2', 'IRSA tranche 2 (350001-400000)', 5.00, 'pourcentage', 'irsa', '2025-01-01', TRUE),
 ('IRSA_TAUX_3', 'IRSA tranche 3 (400001-500000)', 10.00, 'pourcentage', 'irsa', '2025-01-01', TRUE),
 ('IRSA_TAUX_4', 'IRSA tranche 4 (500001-600000)', 15.00, 'pourcentage', 'irsa', '2025-01-01', TRUE),
 ('IRSA_TAUX_5', 'IRSA tranche 5 (>600000)', 20.00, 'pourcentage', 'irsa', '2025-01-01', TRUE),
-('PRIME_ANCIENNETE', 'Prime d''ancienneté par année', 5000.00, 'montant_fixe', 'prime', '2025-01-01', TRUE),
-('INDEMNITE_TRANSPORT', 'Indemnité de transport mensuelle', 50000.00, 'montant_fixe', 'indemnite', '2025-01-01', TRUE),
+('PRIME_ANCIENNETE', 'Prime d''anciennete par annee', 5000.00, 'montant_fixe', 'prime', '2025-01-01', TRUE),
+('INDEMNITE_TRANSPORT', 'Indemnite de transport mensuelle', 50000.00, 'montant_fixe', 'indemnite', '2025-01-01', TRUE),
 ('ALLOCATION_FAMILIALE', 'Allocation familiale par enfant', 20000.00, 'montant_fixe', 'indemnite', '2025-01-01', TRUE);
 
--- ============================================================
--- 7. SALARY_COMPONENTS_RH (Composantes salaire)
--- ============================================================
+
 INSERT INTO public.salary_components_rh (personnel_id, type_composante, montant, is_recurring) VALUES
 (1, 'prime_anciennete', 75000.00, TRUE),
 (1, 'indemnite_transport', 50000.00, TRUE),
@@ -127,24 +116,20 @@ INSERT INTO public.salary_components_rh (personnel_id, type_composante, montant,
 (6, 'indemnite_transport', 50000.00, TRUE),
 (6, 'allocation_familiale', 20000.00, TRUE);
 
--- ============================================================
--- 8. COMPETENCES_RH (Référentiel de compétences)
--- ============================================================
+
 INSERT INTO public.competences_rh (nom, description, categorie, niveau_requis) VALUES
 ('Gestion de la paie', 'Maîtrise des calculs de paie et charges sociales', 'technique', 4),
 ('Droit du travail Madagascar', 'Connaissance Code du travail malgache', 'technique', 3),
-('Excel avancé', 'Tableaux croisés dynamiques, macros VBA', 'technique', 4),
-('Communication interpersonnelle', 'Capacité à échanger efficacement', 'soft_skills', 3),
+('Excel avance', 'Tableaux croises dynamiques, macros VBA', 'technique', 4),
+('Communication interpersonnelle', 'Capacite à echanger efficacement', 'soft_skills', 3),
 ('Gestion du stress', 'Gestion des situations de pression', 'soft_skills', 3),
-('Leadership', 'Capacité à diriger une équipe', 'management', 4),
-('Prise de décision', 'Analyse et décisions stratégiques', 'management', 4),
+('Leadership', 'Capacite à diriger une equipe', 'management', 4),
+('Prise de decision', 'Analyse et decisions strategiques', 'management', 4),
 ('Anglais professionnel', 'Niveau B2 minimum', 'langue', 3),
 ('Français professionnel', 'Niveau C1 minimum', 'langue', 4),
 ('Logiciels RH (SIRH)', 'Utilisation outils de gestion RH', 'technique', 3);
 
--- ============================================================
--- 9. COMPETENCES_MAPPING_RH (Compétences par employé)
--- ============================================================
+
 INSERT INTO public.competences_mapping_rh (personnel_id, competence_id, niveau_actuel, date_evaluation, validated_by) VALUES
 (1, 1, 4, '2025-01-15', 13),
 (1, 2, 3, '2025-01-15', 13),
@@ -158,17 +143,13 @@ INSERT INTO public.competences_mapping_rh (personnel_id, competence_id, niveau_a
 (6, 8, 4, '2025-05-12', 13),
 (6, 9, 5, '2025-05-12', 13);
 
--- ============================================================
--- 10. DOCUMENTS_TEMPLATES_RH (Templates)
--- ============================================================
-INSERT INTO public.documents_templates_rh (type_document, nom_template, template_content, variables_disponibles, is_active) VALUES
-('contrat_cdi', 'Contrat CDI Standard', '<h1>CONTRAT DE TRAVAIL À DURÉE INDÉTERMINÉE</h1><p>Entre la société {{company_name}} et {{employee_name}}, matricule {{matricule}}...</p>', '{"company_name":"Nom entreprise","employee_name":"Nom employé","matricule":"Matricule","post":"Poste","salary":"Salaire","start_date":"Date début"}', TRUE),
-('attestation_travail', 'Attestation de travail', '<h1>ATTESTATION DE TRAVAIL</h1><p>Je soussigné(e), certifie que {{employee_name}}, né(e) le {{birth_date}}, travaille dans notre entreprise depuis le {{start_date}} en qualité de {{post}}.</p>', '{"employee_name":"Nom employé","birth_date":"Date naissance","start_date":"Date embauche","post":"Poste"}', TRUE),
-('attestation_salaire', 'Attestation de salaire', '<h1>ATTESTATION DE SALAIRE</h1><p>Nous certifions que {{employee_name}}, matricule {{matricule}}, perçoit un salaire mensuel brut de {{salary}} Ariary.</p>', '{"employee_name":"Nom employé","matricule":"Matricule","salary":"Salaire brut"}', TRUE);
 
--- ============================================================
--- SET SEQUENCE VALUES
--- ============================================================
+INSERT INTO public.documents_templates_rh (type_document, nom_template, template_content, variables_disponibles, is_active) VALUES
+('contrat_cdi', 'Contrat CDI Standard', '<h1>CONTRAT DE TRAVAIL À DUReE INDeTERMINeE</h1><p>Entre la societe {{company_name}} et {{employee_name}}, matricule {{matricule}}...</p>', '{"company_name":"Nom entreprise","employee_name":"Nom employe","matricule":"Matricule","post":"Poste","salary":"Salaire","start_date":"Date debut"}', TRUE),
+('attestation_travail', 'Attestation de travail', '<h1>ATTESTATION DE TRAVAIL</h1><p>Je soussigne(e), certifie que {{employee_name}}, ne(e) le {{birth_date}}, travaille dans notre entreprise depuis le {{start_date}} en qualite de {{post}}.</p>', '{"employee_name":"Nom employe","birth_date":"Date naissance","start_date":"Date embauche","post":"Poste"}', TRUE),
+('attestation_salaire', 'Attestation de salaire', '<h1>ATTESTATION DE SALAIRE</h1><p>Nous certifions que {{employee_name}}, matricule {{matricule}}, perçoit un salaire mensuel brut de {{salary}} Ariary.</p>', '{"employee_name":"Nom employe","matricule":"Matricule","salary":"Salaire brut"}', TRUE);
+
+
 SELECT pg_catalog.setval('public.personnel_rh_id_seq', 10, true);
 SELECT pg_catalog.setval('public.contracts_rh_id_seq', 10, true);
 SELECT pg_catalog.setval('public.leave_types_rh_id_seq', 8, true);
@@ -177,5 +158,5 @@ SELECT pg_catalog.setval('public.competences_rh_id_seq', 10, true);
 SELECT pg_catalog.setval('public.documents_templates_rh_id_seq', 3, true);
 
 -- ============================================================
--- FIN DES DONNÉES RH
+-- FIN DES DONNeES RH
 -- ============================================================
