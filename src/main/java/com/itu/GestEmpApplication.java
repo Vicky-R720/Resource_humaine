@@ -1,4 +1,4 @@
-package com.itu.gest_emp;
+package com.itu;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

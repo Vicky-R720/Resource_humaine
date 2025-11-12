@@ -1,4 +1,4 @@
-package com.itu.gest_emp;
+package com.itu;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

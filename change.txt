@@ -1,2 +1,10 @@
-1-napiana filiere sy niveau classe diplome
-2-apiana experienceLevel ao amin'ny appliances
+<!-- Pyramide des âges -->
+                <div class="stat-card">
+                    <h3><i class="fas fa-birthday-cake"></i> Pyramide des Âges</h3>
+                    <div class="chart-container">
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                </div>
+
+pour cette code est ce que tu peux faire apparaitre tout les tranche d'age dedans c'est a dire:
+de 20 a 30 ; de 30 a 40 ; 40 a 50 et ainsi de suite

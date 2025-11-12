@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard RH - Statistiques Complètes</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #667eea;
+            --accent: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --shadow: 0 10px 25px rgba(0,0,0,0.08);
+            --shadow-hover: 0 15px 35px rgba(0,0,0,0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .dashboard {
+            min-height: 100vh;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .header-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        /* KPI Cards avec tendance */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--gradient);
+        }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .kpi-icon {
+            font-size: 2rem;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .kpi-trend {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .trend-up {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .trend-down {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .trend-stable {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+
+        .kpi-value {
+            font-size: 3rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0.5rem 0;
+        }
+
+        .kpi-label {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Grilles de graphiques */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .stat-card h3 {
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .stat-card h3 i {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        .large-chart {
+            height: 400px;
+        }
+
+        /* Section séparée */
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-title i {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Table pour top absents */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            background: var(--light-bg);
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .data-table tr:hover {
+            background: var(--light-bg);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- En-tête -->
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> Dashboard RH Complet</h1>
+            <p>Analyse des effectifs, indicateurs clés et performance</p>
+            <div class="header-actions">
+                <a href="/rh/statistics/export/csv" class="btn btn-secondary">
+                    <i class="fas fa-download"></i> Exporter CSV
+                </a>
+                <button onclick="window.print()" class="btn btn-secondary">
+                    <i class="fas fa-print"></i> Imprimer
+                </button>
+            </div>
+        </div>
+
+        <!-- Erreur -->
+        <div th:if="${error}" class="error">
+            <strong>Erreur:</strong> <span th:text="${error}"></span>
+        </div>
+
+        <!-- Section A: INDICATEURS CLÉS (KPI) -->
+        <div class="section">
+            <h2 class="section-title">
+                <i class="fas fa-tachometer-alt"></i> Indicateurs Clés de Performance
+            </h2>
+            
+            <div class="kpi-grid">
+                <!-- Effectif Total -->
+                <div class="kpi-card">
+                    <div class="kpi-header">
+                        <i class="fas fa-users kpi-icon"></i>
+                    </div>
+                    <div class="kpi-value" th:text="${totalEffectif != null ? totalEffectif : 0}">0</div>
+                    <div class="kpi-label">Effectif Total Actif</div>
+                </div>
+
+                <!-- Turnover -->
+                <div class="kpi-card" th:if="${kpiTurnover != null}">
+                    <div class="kpi-header">
+                        <i th:class="${'fas fa-exchange-alt kpi-icon'}"></i>
+                        <span th:class="${'kpi-trend trend-' + kpiTurnover.trend}" 
+                              th:text="${kpiTurnover.trend == 'up' ? '↑ Élevé' : (kpiTurnover.trend == 'down' ? '↓ Faible' : '→ Normal')}">
+                        </span>
+                    </div>
+                    <div class="kpi-value">
+                        <span th:text="${kpiTurnover.value}">0</span><span style="font-size: 1.5rem;">%</span>
+                    </div>
+                    <div class="kpi-label" th:text="${kpiTurnover.label}">Taux de Turnover</div>
+                </div>
+
+                <!-- Absentéisme -->
+                <div class="kpi-card" th:if="${kpiAbsenteeism != null}">
+                    <div class="kpi-header">
+                        <i class="fas fa-user-clock kpi-icon"></i>
+                        <span th:class="${'kpi-trend trend-' + kpiAbsenteeism.trend}"
+                              th:text="${kpiAbsenteeism.trend == 'up' ? '↑ Élevé' : (kpiAbsenteeism.trend == 'down' ? '↓ Faible' : '→ Normal')}">
+                        </span>
+                    </div>
+                    <div class="kpi-value">
+                        <span th:text="${kpiAbsenteeism.value}">0</span><span style="font-size: 1.5rem;">%</span>
+                    </div>
+                    <div class="kpi-label" th:text="${kpiAbsenteeism.label}">Taux d'Absentéisme</div>
+                </div>
+
+                <!-- Ancienneté -->
+                <div class="kpi-card" th:if="${kpiAnciennete != null}">
+                    <div class="kpi-header">
+                        <i class="fas fa-calendar-check kpi-icon"></i>
+                    </div>
+                    <div class="kpi-value">
+                        <span th:text="${kpiAnciennete.value}">0</span>
+                    </div>
+                    <div class="kpi-label" th:text="${kpiAnciennete.label + ' ' + kpiAnciennete.unit}">Ancienneté Moyenne (ans)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section B: STATISTIQUES EFFECTIFS -->
+        <div class="section">
+            <h2 class="section-title">
+                <i class="fas fa-chart-pie"></i> Répartition des Effectifs
+            </h2>
+            
+            <div class="stats-grid">
+                <!-- Genre -->
+                <div class="stat-card">
+                    <h3><i class="fas fa-venus-mars"></i> Par Genre</h3>
+                    <div class="chart-container">
+                        <canvas id="genderChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Pyramide des âges -->
+                <div class="stat-card">
+                    <h3><i class="fas fa-birthday-cake"></i> Pyramide des Âges</h3>
+                    <div class="chart-container">
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Services -->
+                <div class="stat-card">
+                    <h3><i class="fas fa-building"></i> Par Service</h3>
+                    <div class="chart-container">
+                        <canvas id="serviceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Type de contrat -->
+                <div class="stat-card">
+                    <h3><i class="fas fa-file-contract"></i> Par Type de Contrat</h3>
+                    <div class="chart-container">
+                        <canvas id="contractChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section C: ÉVOLUTIONS -->
+        <div class="section" th:if="${turnoverEvolution != null or absenteeismEvolution != null}">
+            <h2 class="section-title">
+                <i class="fas fa-chart-line"></i> Évolutions sur 12 mois
+            </h2>
+            
+            <div class="stats-grid">
+                <!-- Évolution Turnover -->
+                <div class="stat-card" th:if="${turnoverEvolution != null}">
+                    <h3><i class="fas fa-exchange-alt"></i> Évolution du Turnover</h3>
+                    <div class="chart-container large-chart">
+                        <canvas id="turnoverEvolutionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Évolution Absentéisme -->
+                <div class="stat-card" th:if="${absenteeismEvolution != null}">
+                    <h3><i class="fas fa-user-clock"></i> Évolution de l'Absentéisme</h3>
+                    <div class="chart-container large-chart">
+                        <canvas id="absenteeismEvolutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section D: ANALYSES DÉTAILLÉES -->
+        <div class="section">
+            <h2 class="section-title">
+                <i class="fas fa-microscope"></i> Analyses Détaillées
+            </h2>
+            
+            <div class="stats-grid">
+                <!-- Top absents -->
+                <div class="stat-card" th:if="${topAbsentEmployees != null}">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Top 5 Absences</h3>
+                    <div class="chart-container">
+                        <canvas id="topAbsentChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Congés par type -->
+                <div class="stat-card" th:if="${leavesByType != null}">
+                    <h3><i class="fas fa-umbrella-beach"></i> Congés par Type</h3>
+                    <div class="chart-container">
+                        <canvas id="leavesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Performance par département -->
+                <div class="stat-card" th:if="${performanceByDept != null}">
+                    <h3><i class="fas fa-star"></i> Performance Moyenne par Service</h3>
+                    <div class="chart-container">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Injection des données Thymeleaf -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const statsGenre = /*[[${statsGenre}]]*/ [];
+        const statsAge = /*[[${statsAge}]]*/ [];
+        const statsService = /*[[${statsService}]]*/ [];
+        const statsContrat = /*[[${statsContrat}]]*/ [];
+        const turnoverEvolution = /*[[${turnoverEvolution}]]*/ [];
+        const absenteeismEvolution = /*[[${absenteeismEvolution}]]*/ [];
+        const topAbsentEmployees = /*[[${topAbsentEmployees}]]*/ [];
+        const leavesByType = /*[[${leavesByType}]]*/ [];
+        const performanceByDept = /*[[${performanceByDept}]]*/ [];
+        
+        console.log("Données chargées:", {statsGenre, statsAge, statsService, statsContrat});
+        /*]]>*/
+    </script>
+
+    <script>
+        // Configuration globale Chart.js
+        Chart.defaults.font.family = "'Segoe UI', sans-serif";
+        Chart.defaults.color = '#718096';
+
+        // Couleurs du thème
+        const colors = {
+            primary: '#667eea',
+            accent: '#764ba2',
+            success: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444',
+            info: '#3b82f6',
+            purple: '#8b5cf6',
+            pink: '#ec4899'
+        };
+
+        // Fonction helper pour créer des graphiques
+        function createChart(canvasId, type, labels, data, options = {}) {
+            const ctx = document.getElementById(canvasId);
+            if (!ctx) return null;
+
+            return new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: options.label || 'Effectif',
+                        data: data,
+                        backgroundColor: options.backgroundColor || colors.primary,
+                        borderColor: options.borderColor || colors.primary,
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: options.showLegend !== false,
+                            position: 'top'
+                        }
+                    },
+                    scales: options.hideScales ? undefined : {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Initialisation des graphiques...");
+
+            // Genre
+            if (statsGenre && statsGenre.length > 0) {
+                const labels = statsGenre.map(s => s.label === 'M' ? 'Masculin' : 'Féminin');
+                const data = statsGenre.map(s => s.value);
+                createChart('genderChart', 'doughnut', labels, data, {
+                    backgroundColor: [colors.primary, colors.accent],
+                    showLegend: true
+                });
+            }
+
+            // Âge - Pyramide avec toutes les tranches
+            if (statsAge && statsAge.length > 0) {
+                const ageColors = statsAge.map(s => {
+                    // Colorer différemment selon la valeur
+                    if (s.value === 0) return '#e5e7eb'; // Gris clair pour les tranches vides
+                    if (s.value >= 3) return colors.success; // Vert pour les tranches bien remplies
+                    if (s.value >= 2) return colors.info; // Bleu pour les tranches moyennes
+                    return colors.warning; // Orange pour les petites tranches
+                });
+                
+                createChart('ageChart', 'bar', 
+                    statsAge.map(s => s.label), 
+                    statsAge.map(s => s.value),
+                    {
+                        backgroundColor: ageColors,
+                        label: 'Nombre d\'employés'
+                    }
+                );
+            }
+
+            // Service
+            if (statsService && statsService.length > 0) {
+                const serviceColors = statsService.map((_, i) => 
+                    `hsl(${(i * 360) / statsService.length}, 70%, 60%)`
+                );
+                createChart('serviceChart', 'bar',
+                    statsService.map(s => s.label),
+                    statsService.map(s => s.value),
+                    {backgroundColor: serviceColors}
+                );
+            }
+
+            // Contrat
+            if (statsContrat && statsContrat.length > 0) {
+                createChart('contractChart', 'pie',
+                    statsContrat.map(s => s.label),
+                    statsContrat.map(s => s.value),
+                    {backgroundColor: [colors.success, colors.warning, colors.purple]}
+                );
+            }
+
+            // Évolution turnover
+            if (turnoverEvolution && turnoverEvolution.length > 0) {
+                createChart('turnoverEvolutionChart', 'line',
+                    turnoverEvolution.map(s => s.label),
+                    turnoverEvolution.map(s => s.value),
+                    {
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                        borderColor: colors.danger,
+                        label: 'Départs'
+                    }
+                );
+            }
+
+            // Évolution absentéisme
+            if (absenteeismEvolution && absenteeismEvolution.length > 0) {
+                createChart('absenteeismEvolutionChart', 'line',
+                    absenteeismEvolution.map(s => s.label),
+                    absenteeismEvolution.map(s => s.value),
+                    {
+                        backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                        borderColor: colors.warning,
+                        label: 'Taux d\'absence (%)'
+                    }
+                );
+            }
+
+            // Top absents
+            if (topAbsentEmployees && topAbsentEmployees.length > 0) {
+                createChart('topAbsentChart', 'horizontalBar',
+                    topAbsentEmployees.map(s => s.label),
+                    topAbsentEmployees.map(s => s.value),
+                    {
+                        backgroundColor: colors.danger,
+                        label: 'Jours d\'absence'
+                    }
+                );
+            }
+
+            // Congés par type
+            if (leavesByType && leavesByType.length > 0) {
+                createChart('leavesChart', 'doughnut',
+                    leavesByType.map(s => s.label),
+                    leavesByType.map(s => s.value),
+                    {backgroundColor: [colors.success, colors.warning, colors.info, colors.purple, colors.pink]}
+                );
+            }
+
+            // Performance
+            if (performanceByDept && performanceByDept.length > 0) {
+                createChart('performanceChart', 'bar',
+                    performanceByDept.map(s => s.label),
+                    performanceByDept.map(s => s.value),
+                    {
+                        backgroundColor: colors.success,
+                        label: 'Score moyen (/100)'
+                    }
+                );
+            }
+
+            console.log("✅ Tous les graphiques initialisés");
+        });
+    </script>
+</body>
+</html>
