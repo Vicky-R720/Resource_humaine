@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Valider ou rejeter une demande</title>
+</head>
+<body>
+
+<h2>Valider / Rejeter une demande de congé</h2>
+
+<form id="validateForm">
+    <label>ID de la demande :</label>
+    <input type="number" name="requestId"><br><br>
+
+    <label>ID validateur :</label>
+    <input type="number" name="validatorId" value="1"><br><br>
+
+    <label>Action :</label>
+    <select name="action">
+        <option value="approve">Approuver</option>
+        <option value="reject">Rejeter</option>
+    </select><br><br>
+
+    <label>Commentaire :</label>
+    <input type="text" name="comment"><br><br>
+
+    <button type="button" onclick="validateRequest()">Envoyer</button>
+</form>
+
+<div id="result"></div>
+
+<script>
+    function validateRequest() {
+        const form = document.getElementById('validateForm');
+
+        const url = `/api/leave-requests/${form.requestId.value}/validate`
+            + `?action=${form.action.value}`
+            + `&validatorId=${form.validatorId.value}`
+            + `&comment=${form.comment.value}`;
+
+        fetch(url, { method: "POST" })
+            .then(resp => resp.text())
+            .then(data => document.getElementById("result").innerText = data)
+            .catch(err => alert(err));
+    }
+</script>
+
+</body>
+</html>
