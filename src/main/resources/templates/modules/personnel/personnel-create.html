@@ -1,0 +1,456 @@
+<!-- ==================== 3. Formulaire Création Employé (personnel-create.html) ==================== -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un Employé</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .back-btn {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .form-card {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .form-header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .form-header p {
+            color: #666;
+            font-size: 15px;
+        }
+        .form-section {
+            margin-bottom: 35px;
+        }
+        .section-title {
+            font-size: 18px;
+            color: #2196F3;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        .form-group label {
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+        .form-group label .required {
+            color: #f44336;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2196F3;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .photo-upload {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .photo-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 3px solid #2196F3;
+            object-fit: cover;
+        }
+        .upload-btn {
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .upload-btn:hover {
+            background: #1976D2;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #1976D2;
+        }
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background: #bdbdbd;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="history.back()">← Retour</button>
+
+        <div class="form-card">
+            <div class="form-header">
+                <h1>👤 Créer un Nouvel Employé</h1>
+                <p>Remplissez tous les champs obligatoires marqués d'un astérisque (*)</p>
+            </div>
+
+            <div id="alertMessage" class="alert"></div>
+
+            <form id="personnelForm">
+                <!-- Section 1: Identité -->
+                <div class="form-section">
+                    <h2 class="section-title">📋 Identité & Photo</h2>
+                    
+                    <div class="form-group full-width">
+                        <label>Photo de profil</label>
+                        <div class="photo-upload">
+                            <img id="photoPreview" src="default-avatar.png" alt="Photo" class="photo-preview">
+                            <input type="file" id="photoInput" accept="image/*" style="display: none;">
+                            <button type="button" class="upload-btn" onclick="document.getElementById('photoInput').click()">
+                                📷 Choisir une photo
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Personne (ID) <span class="required">*</span></label>
+                            <select id="personId" required>
+                                <option value="">Sélectionner...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Matricule <span class="required">*</span></label>
+                            <input type="text" id="matricule" placeholder="EMP001" required>
+                        </div>
+                        <div class="form-group">
+                            <label>CIN</label>
+                            <input type="text" id="cin" placeholder="123 456 789 012">
+                        </div>
+                        <div class="form-group">
+                            <label>Date de délivrance CIN</label>
+                            <input type="date" id="cinDateDelivery">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Lieu de délivrance CIN</label>
+                            <input type="text" id="cinPlaceDelivery" placeholder="Antananarivo">
+                        </div>
+                        <div class="form-group">
+                            <label>Sexe</label>
+                            <select id="sexe">
+                                <option value="">Sélectionner...</option>
+                                <option value="Masculin">Masculin</option>
+                                <option value="Féminin">Féminin</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Nationalité</label>
+                            <input type="text" id="nationalite" value="Malagasy">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Lieu de naissance</label>
+                            <input type="text" id="lieuNaissance" placeholder="Antananarivo">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Situation Familiale -->
+                <div class="form-section">
+                    <h2 class="section-title">👨‍👩‍👧‍👦 Situation Familiale</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Situation familiale</label>
+                            <select id="situationFamiliale">
+                                <option value="">Sélectionner...</option>
+                                <option value="Célibataire">Célibataire</option>
+                                <option value="Marié(e)">Marié(e)</option>
+                                <option value="Divorcé(e)">Divorcé(e)</option>
+                                <option value="Veuf(ve)">Veuf(ve)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre d'enfants</label>
+                            <input type="number" id="nombreEnfants" value="0" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Contact d'urgence -->
+                <div class="form-section">
+                    <h2 class="section-title">🚨 Personne à contacter en cas d'urgence</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nom complet</label>
+                            <input type="text" id="personneUrgenceNom" placeholder="Nom Prénom">
+                        </div>
+                        <div class="form-group">
+                            <label>Contact</label>
+                            <input type="text" id="personneUrgenceContact" placeholder="033 00 000 00">
+                        </div>
+                        <div class="form-group">
+                            <label>Lien</label>
+                            <input type="text" id="personneUrgenceLien" placeholder="Conjoint(e), Parent, etc.">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Informations Bancaires -->
+                <div class="form-section">
+                    <h2 class="section-title">🏦 Informations Bancaires & Sociales</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>RIB</label>
+                            <input type="text" id="rib" placeholder="00000-00-00000000000-00">
+                        </div>
+                        <div class="form-group">
+                            <label>Banque</label>
+                            <input type="text" id="banque" placeholder="BNI, BOA, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label>Numéro CNAPS</label>
+                            <input type="text" id="numeroCnaps" placeholder="123456789">
+                        </div>
+                        <div class="form-group">
+                            <label>Numéro OSTIE</label>
+                            <input type="text" id="numeroOstie" placeholder="123456789">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Informations Professionnelles -->
+                <div class="form-section">
+                    <h2 class="section-title">💼 Informations Professionnelles</h2>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Poste <span class="required">*</span></label>
+                            <select id="postId" required>
+                                <option value="">Sélectionner...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Date d'embauche <span class="required">*</span></label>
+                            <input type="date" id="dateEmbauche" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Statut</label>
+                            <select id="statut">
+                                <option value="actif">Actif</option>
+                                <option value="inactif">Inactif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="history.back()">
+                        ❌ Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        ✅ Créer l'employé
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8081/api';
+
+        // Charger les données de référence
+        async function loadReferenceData() {
+            try {
+                // Charger les personnes
+                const personsResponse = await fetch(`${API_URL}/person`);
+                const persons = await personsResponse.json();
+                const personSelect = document.getElementById('personId');
+                persons.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.id;
+                    option.textContent = `${p.nom} ${p.prenom}`;
+                    personSelect.appendChild(option);
+                });
+
+                // Charger les postes
+                const postsResponse = await fetch(`${API_URL}/post`);
+                const posts = await postsResponse.json();
+                const postSelect = document.getElementById('postId');
+                posts.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.id;
+                    option.textContent = p.name;
+                    postSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Preview photo
+        document.getElementById('photoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('photoPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Soumettre le formulaire
+        document.getElementById('personnelForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const personnelData = {
+                person: { id: document.getElementById('personId').value },
+                post: { id: document.getElementById('postId').value },
+                matricule: document.getElementById('matricule').value,
+                cin: document.getElementById('cin').value,
+                cinDateDelivery: document.getElementById('cinDateDelivery').value,
+                cinPlaceDelivery: document.getElementById('cinPlaceDelivery').value,
+                sexe: document.getElementById('sexe').value,
+                situationFamiliale: document.getElementById('situationFamiliale').value,
+                nombreEnfants: parseInt(document.getElementById('nombreEnfants').value) || 0,
+                nationalite: document.getElementById('nationalite').value,
+                lieuNaissance: document.getElementById('lieuNaissance').value,
+                personneUrgenceNom: document.getElementById('personneUrgenceNom').value,
+                personneUrgenceContact: document.getElementById('personneUrgenceContact').value,
+                personneUrgenceLien: document.getElementById('personneUrgenceLien').value,
+                rib: document.getElementById('rib').value,
+                banque: document.getElementById('banque').value,
+                numeroCnaps: document.getElementById('numeroCnaps').value,
+                numeroOstie: document.getElementById('numeroOstie').value,
+                dateEmbauche: document.getElementById('dateEmbauche').value,
+                statut: document.getElementById('statut').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/personnel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(personnelData)
+                });
+
+                if (response.ok) {
+                    showAlert('✅ Employé créé avec succès !', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'personnel-list.html';
+                    }, 1500);
+                } else {
+                    showAlert('❌ Erreur lors de la création', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showAlert('❌ Erreur de connexion au serveur', 'error');
+            }
+        });
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alertMessage');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialiser
+        loadReferenceData();
+    </script>
+</body>
+</html>
