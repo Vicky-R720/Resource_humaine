@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Validation des Heures Supplémentaires</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <h1>Heures supplémentaires en attente de validation</h1>
+
+    <a th:href="@{/temps_presence/overtime}">Retour à la liste générale</a>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Personnel</th>
+                <th>Date</th>
+                <th>Nombre d'heures</th>
+                <th>Type</th>
+                <th>Montant HS</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="overtime : ${overtimes}">
+                <td th:text="${overtime.id}"></td>
+                <td th:text="${overtime.personnel.person.nom}"></td>
+                <td th:text="${#temporals.format(overtime.dateHs, 'dd/MM/yyyy')}"></td>
+                <td th:text="${overtime.nombreHeures}"></td>
+                <td th:text="${overtime.typeHs}"></td>
+                <td th:text="${overtime.montantHs}"></td>
+                <td>
+                    <form th:action="@{/temps_presence/overtime/{id}/valider(id=${overtime.id})}" method="post">
+                        <input type="hidden" name="validatorId" value="1"/> <!-- À remplacer par l'utilisateur connecté -->
+                        <input type="hidden" name="approuve" value="true"/>
+                        <input type="hidden" name="commentaire" value="Validation OK"/>
+                        <button type="submit">Valider</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${success}" style="color:green" th:text="${success}"></div>
+    <div th:if="${error}" style="color:red" th:text="${error}"></div>
+</body>
+</html>
