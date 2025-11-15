@@ -1,7 +1,9 @@
-package com.itu.gest_emp.model;
+package com.itu.gest_emp.modules.shared.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import com.itu.gest_emp.model.Appliance;
 
 @Entity
 @Table(name = "notification")

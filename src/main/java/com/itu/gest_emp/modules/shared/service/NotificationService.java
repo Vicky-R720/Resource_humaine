@@ -1,4 +1,4 @@
-package com.itu.gest_emp.service;
+package com.itu.gest_emp.modules.shared.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.itu.gest_emp.model.Appliance;
-import com.itu.gest_emp.model.Notification;
-import com.itu.gest_emp.model.Person;
-import com.itu.gest_emp.repository.NotificationRepository;
+import com.itu.gest_emp.modules.shared.model.Notification;
+import com.itu.gest_emp.modules.shared.model.Person;
+import com.itu.gest_emp.modules.shared.repository.NotificationRepository;
 
 @Service
 public class NotificationService {
@@ -33,5 +33,12 @@ public class NotificationService {
     
     public void deleteNotification(Long notificationId) {
         notificationRepository.deleteById(notificationId);
+    }
+
+
+
+    public void createNotification(Notification notification) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'createNotification'");
     }
 }

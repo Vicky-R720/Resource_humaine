@@ -1,8 +1,9 @@
-package com.itu.gest_emp.service;
+package com.itu.gest_emp.modules.shared.service;
 
 import com.itu.gest_emp.model.Matching;
-import com.itu.gest_emp.model.Person;
-import com.itu.gest_emp.repository.PersonRepository;
+import com.itu.gest_emp.modules.shared.model.Person;
+import com.itu.gest_emp.modules.shared.repository.PersonRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

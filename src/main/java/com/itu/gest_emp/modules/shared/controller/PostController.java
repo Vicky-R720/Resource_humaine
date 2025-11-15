@@ -1,7 +1,8 @@
-package com.itu.gest_emp.controller;
+package com.itu.gest_emp.modules.shared.controller;
 
-import com.itu.gest_emp.model.Post;
-import com.itu.gest_emp.service.PostService;
+import com.itu.gest_emp.modules.shared.model.Post;
+import com.itu.gest_emp.modules.shared.service.PostService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.itu.gest_emp.modules.shared.model.Person;
+
 @Entity
 @Table(name = "appliance")
 public class Appliance {

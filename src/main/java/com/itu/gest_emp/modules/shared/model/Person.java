@@ -1,9 +1,13 @@
-package com.itu.gest_emp.model;
+package com.itu.gest_emp.modules.shared.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+
+import com.itu.gest_emp.model.AcademicalQualification;
+import com.itu.gest_emp.model.Appliance;
+import com.itu.gest_emp.model.Offer;
 
 @Entity
 @Table(name = "person")

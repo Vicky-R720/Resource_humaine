@@ -180,6 +180,10 @@ CREATE TABLE public.salary_parameters_rh (
     updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE public.salary_parameters_rh 
+ADD COLUMN seuil_min DECIMAL(15,2) DEFAULT 0,
+ADD COLUMN seuil_max DECIMAL(15,2) DEFAULT NULL;
+
 -- Table Salary_Components_RH (Composantes salaire par employé)
 CREATE TABLE public.salary_components_rh (
     id BIGSERIAL PRIMARY KEY,

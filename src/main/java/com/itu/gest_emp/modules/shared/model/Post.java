@@ -1,6 +1,14 @@
-package com.itu.gest_emp.model;
+package com.itu.gest_emp.modules.shared.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "post")
@@ -18,14 +26,19 @@ public class Post {
     @Column(name = "missions", columnDefinition = "TEXT")
     private String missions;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_id")
+    private Service service;
+
     // Constructeurs
     public Post() {
     }
 
-    public Post(String name, String description, String missions) {
+    public Post(String name, String description, String missions, Service service) {
         this.name = name;
         this.description = description;
         this.missions = missions;
+        this.service = service;
     }
 
     // Getters et setters
@@ -61,6 +74,14 @@ public class Post {
         this.missions = missions;
     }
 
+    public Service getService() {
+        return service;
+    }
+
+    public void setService(Service service) {
+        this.service = service;
+    }
+
     @Override
     public String toString() {
         return "Post{" +
@@ -68,6 +89,7 @@ public class Post {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", missions='" + missions + '\'' +
+                ", service=" + (service != null ? service.getName() : "null") +
                 '}';
     }
 }

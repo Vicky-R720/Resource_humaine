@@ -31,6 +31,39 @@ INSERT INTO public.personnel_rh (
 (10, 6, 'EMP010', '101234567899', '2009-05-01', 'Ambatolampy', 'F', 'Celibataire', 0, 'Ambatolampy', 'Rasolofoniaina Jacques', '034 01 234 56', 'Frere', '00012345678901234576', 'BNI Madagascar', 'CNAPS010', 'OSTIE010', '2017-10-05', 'actif');
 
 
+
+INSERT INTO public.documents_rh (personnel_id, type_document, nom_document, description, file_path, date_expiration, is_verified, verified_by)
+VALUES
+-- Personnel 4
+(4, 'CIN', 'CIN_EMP004.pdf', 'Carte d''identité nationale', '/files/EMP004/CIN_EMP004.pdf', NULL, TRUE, 1),
+(4, 'Contrat', 'Contrat_EMP004.pdf', 'Contrat de travail', '/files/EMP004/Contrat_EMP004.pdf', NULL, TRUE, 1),
+
+-- Personnel 5
+(5, 'Diplome', 'Diplome_EMP005.pdf', 'Diplôme universitaire', '/files/EMP005/Diplome_EMP005.pdf', NULL, TRUE, 1),
+(5, 'Contrat', 'Contrat_EMP005.pdf', 'Contrat de travail', '/files/EMP005/Contrat_EMP005.pdf', NULL, TRUE, 1),
+
+-- Personnel 6
+(6, 'CIN', 'CIN_EMP006.pdf', 'Carte d''identité nationale', '/files/EMP006/CIN_EMP006.pdf', NULL, TRUE, 2),
+(6, 'Medical', 'CertificatMedical_EMP006.pdf', 'Certificat médical annuel', '/files/EMP006/CertificatMedical_EMP006.pdf', '2026-06-30', TRUE, 2),
+
+-- Personnel 7
+(7, 'Contrat', 'Contrat_EMP007.pdf', 'Contrat de travail', '/files/EMP007/Contrat_EMP007.pdf', NULL, TRUE, 2),
+(7, 'Attestation', 'AttestationTravail_EMP007.pdf', 'Attestation de travail', '/files/EMP007/AttestationTravail_EMP007.pdf', NULL, TRUE, 2),
+
+-- Personnel 8
+(8, 'CIN', 'CIN_EMP008.pdf', 'Carte d''identité nationale', '/files/EMP008/CIN_EMP008.pdf', NULL, TRUE, 3),
+(8, 'Contrat', 'Contrat_EMP008.pdf', 'Contrat de travail', '/files/EMP008/Contrat_EMP008.pdf', NULL, TRUE, 3),
+(8, 'Diplome', 'Diplome_EMP008.pdf', 'Diplôme université', '/files/EMP008/Diplome_EMP008.pdf', NULL, TRUE, 3),
+
+-- Personnel 9
+(9, 'CIN', 'CIN_EMP009.pdf', 'Carte d''identité nationale', '/files/EMP009/CIN_EMP009.pdf', NULL, TRUE, 3),
+(9, 'Medical', 'CertificatMedical_EMP009.pdf', 'Certificat médical annuel', '/files/EMP009/CertificatMedical_EMP009.pdf', '2026-04-30', TRUE, 3),
+
+-- Personnel 10
+(10, 'Contrat', 'Contrat_EMP010.pdf', 'Contrat de travail', '/files/EMP010/Contrat_EMP010.pdf', NULL, TRUE, 3),
+(10, 'Attestation', 'AttestationTravail_EMP010.pdf', 'Attestation de travail', '/files/EMP010/AttestationTravail_EMP010.pdf', NULL, TRUE, 3);
+
+
 INSERT INTO public.contracts_rh (
     personnel_id, type_contrat, date_debut, date_fin, duree_essai_mois, 
     date_fin_essai, is_essai_valide, salaire_base, statut
@@ -157,6 +190,27 @@ SELECT pg_catalog.setval('public.salary_parameters_rh_id_seq', 12, true);
 SELECT pg_catalog.setval('public.competences_rh_id_seq', 10, true);
 SELECT pg_catalog.setval('public.documents_templates_rh_id_seq', 3, true);
 
+
+
+UPDATE public.salary_parameters_rh 
+SET seuil_min = 0, seuil_max = 350000 
+WHERE nom_parametre = 'IRSA_TAUX_1';
+
+UPDATE public.salary_parameters_rh 
+SET seuil_min = 350001, seuil_max = 400000 
+WHERE nom_parametre = 'IRSA_TAUX_2';
+
+UPDATE public.salary_parameters_rh 
+SET seuil_min = 400001, seuil_max = 500000 
+WHERE nom_parametre = 'IRSA_TAUX_3';
+
+UPDATE public.salary_parameters_rh 
+SET seuil_min = 500001, seuil_max = 600000 
+WHERE nom_parametre = 'IRSA_TAUX_4';
+
+UPDATE public.salary_parameters_rh 
+SET seuil_min = 600001, seuil_max = NULL 
+WHERE nom_parametre = 'IRSA_TAUX_5';
 -- ============================================================
 -- FIN DES DONNeES RH
 -- ============================================================

@@ -1,9 +1,10 @@
-package com.itu.gest_emp.repository;
-import com.itu.gest_emp.model.Person;
+package com.itu.gest_emp.modules.shared.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import com.itu.gest_emp.modules.shared.model.Person;
 
 import java.util.List;
 

@@ -1,7 +1,8 @@
-package com.itu.gest_emp.service;
+package com.itu.gest_emp.modules.shared.service;
 
-import com.itu.gest_emp.model.Post;
-import com.itu.gest_emp.repository.PostRepository;
+import com.itu.gest_emp.modules.shared.model.Post;
+import com.itu.gest_emp.modules.shared.repository.PostRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

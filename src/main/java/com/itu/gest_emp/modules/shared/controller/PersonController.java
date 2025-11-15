@@ -1,15 +1,15 @@
-package com.itu.gest_emp.controller;
+package com.itu.gest_emp.modules.shared.controller;
 
 import com.itu.gest_emp.model.Appliance;
-import com.itu.gest_emp.model.Notification;
 import com.itu.gest_emp.model.Offer;
-import com.itu.gest_emp.model.Person;
 import com.itu.gest_emp.model.Personnel;
+import com.itu.gest_emp.modules.shared.model.Notification;
+import com.itu.gest_emp.modules.shared.model.Person;
+import com.itu.gest_emp.modules.shared.service.NotificationService;
+import com.itu.gest_emp.modules.shared.service.PersonService;
 import com.itu.gest_emp.service.ApplianceService;
-import com.itu.gest_emp.service.NotificationService;
 import com.itu.gest_emp.service.OfferService;
 import com.itu.gest_emp.service.PdfService;
-import com.itu.gest_emp.service.PersonService;
 import com.itu.gest_emp.service.PersonnelService;
 
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,9 +1,9 @@
 package com.itu.gest_emp.controller;
 
-import com.itu.gest_emp.model.Notification;
-import com.itu.gest_emp.model.Person;
-import com.itu.gest_emp.service.NotificationService;
-import com.itu.gest_emp.service.PersonService;
+import com.itu.gest_emp.modules.shared.model.Notification;
+import com.itu.gest_emp.modules.shared.model.Person;
+import com.itu.gest_emp.modules.shared.service.NotificationService;
+import com.itu.gest_emp.modules.shared.service.PersonService;
 
 import jakarta.servlet.http.HttpSession;
 
