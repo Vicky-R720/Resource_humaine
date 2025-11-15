@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des primes</title>
+    <style>
+        .primes-container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .primes-header { display: flex; justify-content: between; align-items: center; margin-bottom: 30px; }
+        .primes-card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .table th { background: #f8f9fa; font-weight: 600; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .badge-recurrent { background: #d4edda; color: #155724; }
+        .badge-ponctuel { background: #fff3cd; color: #856404; }
+        .form-inline { display: flex; gap: 10px; align-items: end; }
+        .form-group { margin-bottom: 15px; }
+        .form-control { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="primes-container">
+        <div class="primes-header">
+            <h1 th:text="${pageTitle}">Gestion des primes</h1>
+            <div>
+                <a th:href="@{/modules/paie/primes/employe/{id}/nouveau(id=${personnelId})}" class="btn btn-primary">
+                    Nouvelle prime récurrente
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <!-- Formulaire prime ponctuelle rapide -->
+        <div class="primes-card">
+            <h3>Ajouter une prime ponctuelle</h3>
+            <form method="post" action="/modules/paie/primes/prime-ponctuelle" class="form-inline">
+                <input type="hidden" name="personnelId" th:value="${personnelId}">
+                
+                <div style="flex: 1;">
+                    <label>Type de prime</label>
+                    <select name="type" class="form-control" required>
+                        <option value="">Choisir le type</option>
+                        <option value="prime_performance">Prime de performance</option>
+                        <option value="prime_projet">Prime de projet</option>
+                        <option value="prime_exceptionnelle">Prime exceptionnelle</option>
+                        <option value="prime_13eme">13ème mois</option>
+                        <option value="prime_panier">Prime panier</option>
+                    </select>
+                </div>
+                
+                <div style="flex: 1;">
+                    <label>Montant</label>
+                    <input type="number" name="montant" class="form-control" step="0.01" min="0" required>
+                </div>
+                
+                <div style="flex: 1;">
+                    <label>Date d'effet</label>
+                    <input type="date" name="dateEffet" class="form-control" required>
+                </div>
+                
+                <div style="flex: 2;">
+                    <label>Description</label>
+                    <input type="text" name="description" class="form-control" placeholder="Raison de la prime..." required>
+                </div>
+                
+                <div>
+                    <button type="submit" class="btn btn-success">Ajouter</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Liste des primes -->
+        <div class="primes-card">
+            <h3>Primes et indemnités de l'employé</h3>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Montant</th>
+                        <th>Périodicité</th>
+                        <th>Date début</th>
+                        <th>Date fin</th>
+                        <th>Description</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="prime : ${primes}">
+                        <td th:text="${prime.typeComposante}"></td>
+                        <td th:text="${#numbers.formatDecimal(prime.montant, 0, 'COMMA', 2, 'POINT')} + ' Ar'"></td>
+                        <td>
+                            <span th:if="${prime.isRecurring}" class="badge badge-recurrent">Récurrente</span>
+                            <span th:unless="${prime.isRecurring}" class="badge badge-ponctuel">Ponctuelle</span>
+                        </td>
+                        <td th:text="${#temporals.format(prime.dateDebut, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${prime.dateFin != null} ? ${#temporals.format(prime.dateFin, 'dd/MM/yyyy')} : 'Indéfinie'"></td>
+                        <td th:text="${prime.description}"></td>
+                        <td>
+                            <span th:if="${prime.statut == 'actif'}" class="badge badge-active">Actif</span>
+                            <span th:unless="${prime.statut == 'actif'}" class="badge badge-inactive">Inactif</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/modules/paie/primes/editer/{id}(id=${prime.id})}" class="btn btn-primary">Modifier</a>
+                            <form method="post" th:action="@{/modules/paie/primes/supprimer/{id}(id=${prime.id})}" style="display: inline;">
+                                <input type="hidden" name="personnelId" th:value="${personnelId}">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer cette prime?')">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                    
+                    <tr th:if="${primes.empty}">
+                        <td colspan="8" style="text-align: center; color: #666;">
+                            Aucune prime configurée pour cet employé
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Primes automatiques -->
+        <div class="primes-card">
+            <h3>Primes calculées automatiquement</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4>Prime d'ancienneté</h4>
+                    <p>Calculée automatiquement basée sur la date d'embauche et le taux configuré</p>
+                    <button class="btn btn-primary">Recalculer</button>
+                </div>
+                
+                <div>
+                    <h4>Allocation familiale</h4>
+                    <p>Calculée automatiquement basée sur le nombre d'enfants</p>
+                    <button class="btn btn-primary">Recalculer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

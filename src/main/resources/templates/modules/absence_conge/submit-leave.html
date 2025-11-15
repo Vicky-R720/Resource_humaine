@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Soumettre une demande de congé</title>
+</head>
+<body>
+
+<h2>Soumettre une demande de congé</h2>
+
+<form id="leaveForm" enctype="multipart/form-data">
+    <label>Personnel ID :</label>
+    <input type="number" name="personnelId" value="1"><br><br>
+
+    <label>Type de congé (leaveTypeId) :</label>
+    <input type="number" name="leaveTypeId" value="1"><br><br>
+
+    <label>Date début :</label>
+    <input type="date" name="dateDebut"><br><br>
+
+    <label>Date fin :</label>
+    <input type="date" name="dateFin"><br><br>
+
+    <label>Motif :</label>
+    <input type="text" name="motif"><br><br>
+
+    <label>Justificatif :</label>
+    <input type="file" name="justificatif"><br><br>
+
+    <button type="button" onclick="submitRequest()">Envoyer</button>
+</form>
+
+<div id="result"></div>
+
+<script>
+    function submitRequest() {
+        const form = document.getElementById('leaveForm');
+        const formData = new FormData();
+
+        const jsonData = {
+            personnelId: form.personnelId.value,
+            leaveTypeId: form.leaveTypeId.value,
+            dateDebut: form.dateDebut.value,
+            dateFin: form.dateFin.value,
+            motif: form.motif.value
+        };
+
+        formData.append("leaveRequestDTO", new Blob([JSON.stringify(jsonData)], {type : "application/json"}));
+        formData.append("justificatif", form.justificatif.files[0]);
+
+        fetch("/api/leave-requests", {
+            method: "POST",
+            body: formData
+        })
+            .then(resp => resp.text())
+            .then(data => document.getElementById("result").innerText = data)
+            .catch(err => alert(err));
+    }
+</script>
+
+</body>
+</html>

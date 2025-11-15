@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.itu.gest_emp.modules.shared.model.Post;
+
 @Entity
 @Table(name = "offers")
 public class Offer {

@@ -3,6 +3,8 @@ package com.itu.gest_emp.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.itu.gest_emp.modules.shared.model.Person;
+
 @Entity
 @Table(name = "personnel")
 public class Personnel {

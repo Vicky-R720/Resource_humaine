@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Congés</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        input {
+            padding: 5px;
+            width: 100px;
+            margin-right: 5px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 5px 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Simulation des congés</h1>
+
+    <form id="simulateForm">
+        <label>
+            Solde initial :
+            <input type="number" id="initialSolde" value="0" step="0.01" required>
+        </label>
+        <label>
+            Années à simuler :
+            <input type="number" id="yearsWorked" value="4" min="1" required>
+        </label>
+
+        <div id="joursPrisContainer">
+            <!-- Inputs jours pris seront générés ici dynamiquement -->
+        </div>
+
+        <button type="submit">Simuler</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        const yearsInput = document.getElementById('yearsWorked');
+        const joursPrisContainer = document.getElementById('joursPrisContainer');
+        const form = document.getElementById('simulateForm');
+        const resultDiv = document.getElementById('result');
+
+        // Génère dynamiquement les inputs jours pris par année
+        function generateJoursPrisInputs() {
+            let years = parseInt(yearsInput.value) || 1;
+            if (years < 1) years = 1;
+            yearsInput.value = years; // ajuste la valeur si nécessaire
+
+            joursPrisContainer.innerHTML = '<label>Jours pris par année :</label>';
+            for (let i = 1; i <= years; i++) {
+                const div = document.createElement('div');
+                div.innerHTML = `<input type="number" class="joursPris" data-year="${i}" value="10" step="0.01"> Année ${i}`;
+                joursPrisContainer.appendChild(div);
+            }
+        }
+
+
+        // Générer les inputs au chargement initial
+        generateJoursPrisInputs();
+
+        // Met à jour les inputs quand le nombre d'années change
+        yearsInput.addEventListener('input', generateJoursPrisInputs);
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const initialSolde = parseFloat(document.getElementById('initialSolde').value);
+            const years = parseInt(yearsInput.value);
+
+            const joursPrisInputs = document.querySelectorAll('.joursPris');
+            const joursPrisParAn = {};
+            joursPrisInputs.forEach(input => {
+                const year = input.dataset.year;
+                joursPrisParAn[year] = parseFloat(input.value);
+            });
+
+            const payload = {
+                initialSolde,
+                years,
+                joursPrisParAn
+            };
+
+            try {
+                const response = await fetch('/test/balance/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                displayResult(data);
+            } catch (error) {
+                resultDiv.innerHTML = '<p style="color:red">Erreur lors de la simulation.</p>';
+                console.error(error);
+            }
+        });
+
+        function displayResult(data) {
+            let html = '<h2>Résultat de la simulation</h2>';
+            html += '<table><tr><th>Année</th><th>Solde Initial</th><th>Acquis</th><th>Pris</th><th>Restant</th></tr>';
+
+            for (const year in data) {
+                const [soldeInitial, soldeAcquis, soldePris, soldeRestant] = data[year];
+                html += `<tr>
+                            <td>${year}</td>
+                            <td>${soldeInitial}</td>
+                            <td>${soldeAcquis}</td>
+                            <td>${soldePris}</td>
+                            <td>${soldeRestant}</td>
+                         </tr>`;
+            }
+
+            html += '</table>';
+            resultDiv.innerHTML = html;
+        }
+    </script>
+</body>
+
+</html>

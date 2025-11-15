@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <title>Nouveau Pointage</title>
+
+    <!-- CSS minimal -->
+    <style>
+        .page-container {
+            padding: 20px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            margin-bottom: 15px;
+        }
+
+        .box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 7px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .small-box {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 5px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-secondary {
+            background: #777;
+        }
+
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="page-container">
+
+            <h1>
+                <span th:if="${attendance != null}">Modifier le Pointage</span>
+                <span th:unless="${attendance != null}">Nouveau Pointage</span>
+            </h1>
+
+            <!-- Formulaire -->
+            <div class="box">
+                <h3>Informations du Pointage</h3>
+
+
+                <!-- FIXED: Proper ternary operator syntax for form action -->
+                <form th:action="@{/temps-presence/attendance/create}" method="post" th:object="${attendance}">
+
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="personnelId">Personnel *</label>
+                            <select id="personnelId" th:field="*{personnelId}" required>
+                                <option value="">Sélectionner</option>
+                                <option th:each="personnel : ${personnels}" th:value="${personnel.id}"
+                                    th:text="${personnel.person.nom + ' ' + personnel.person.prenom}">
+                                </option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('personnelId')}" class="error" th:errors="*{personnelId}">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="datePointage">Date *</label>
+                            <input type="date" id="datePointage" th:field="*{datePointage}" required>
+                            <div th:if="${#fields.hasErrors('datePointage')}" class="error" th:errors="*{datePointage}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="heureArrivee">Heure Arrivée</label>
+                            <input type="time" id="heureArrivee" th:field="*{heureArrivee}">
+                            <div th:if="${#fields.hasErrors('heureArrivee')}" class="error" th:errors="*{heureArrivee}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="heureDepart">Heure Départ</label>
+                            <input type="time" id="heureDepart" th:field="*{heureDepart}">
+                            <div th:if="${#fields.hasErrors('heureDepart')}" class="error" th:errors="*{heureDepart}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="heurePauseDebut">Début Pause</label>
+                            <input type="time" id="heurePauseDebut" th:field="*{heurePauseDebut}">
+                        </div>
+                        <div class="form-group">
+                            <label for="heurePauseFin">Fin Pause</label>
+                            <input type="time" id="heurePauseFin" th:field="*{heurePauseFin}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="typePointage">Type</label>
+                            <select id="typePointage" th:field="*{typePointage}">
+                                <option value="manuel">Manuel</option>
+                                <option value="badgeuse">Badgeuse</option>
+                                <option value="mobile">Mobile</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="statut">Statut</label>
+                            <select id="statut" th:field="*{statut}">
+                                <option value="present">Présent</option>
+                                <option value="retard">Retard</option>
+                                <option value="absent">Absent</option>
+                                <option value="conge">Congé</option>
+                                <option value="maladie">Maladie</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="commentaire">Commentaire</label>
+                        <textarea id="commentaire" rows="3" th:field="*{commentaire}"></textarea>
+                    </div>
+
+                    <div>
+                        <label>
+                            <input type="checkbox" th:field="*{isValidated}"> Pointage validé
+                        </label>
+                    </div>
+
+                    <div class="buttons">
+                        <a th:href="@{/temps-presence/attendance}" class="btn btn-secondary">Annuler</a>
+                        <button type="submit" class="btn">
+                            <span th:if="${attendance != null and attendance.id != null}">Modifier</span>
+                            <span th:unless="${attendance != null and attendance.id != null}">Enregistrer</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Résumé calculs -->
+            <div class="box">
+                <h3>Aperçu des Calculs</h3>
+                <div class="form-row">
+                    <div class="small-box">
+                        <h4 id="dureeTravail">--:--</h4>
+                        <small>Durée Travail</small>
+                    </div>
+                    <div class="small-box">
+                        <h4 id="dureePause">--:--</h4>
+                        <small>Pause</small>
+                    </div>
+                    <div class="small-box">
+                        <h4 id="retard">--:--</h4>
+                        <small>Retard</small>
+                    </div>
+                    <div class="small-box">
+                        <h4 id="statutCalcul">-</h4>
+                        <small>Statut Calculé</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Improved duration calculation with error handling
+        function calculerDurees() {
+            try {
+                const arrivee = document.getElementById('heureArrivee')?.value;
+                const depart = document.getElementById('heureDepart')?.value;
+                const pauseDebut = document.getElementById('heurePauseDebut')?.value;
+                const pauseFin = document.getElementById('heurePauseFin')?.value;
+
+                if (arrivee && depart) {
+                    // Parse times safely
+                    const parseTime = (timeStr) => {
+                        const [hours, minutes] = timeStr.split(':').map(Number);
+                        return new Date(2000, 0, 1, hours, minutes);
+                    };
+
+                    const arriveeDate = parseTime(arrivee);
+                    const departDate = parseTime(depart);
+
+                    const diffMs = departDate - arriveeDate;
+                    const diffMinutes = Math.floor(diffMs / 60000);
+
+                    let dureePause = 0;
+                    if (pauseDebut && pauseFin) {
+                        const pauseDebutDate = parseTime(pauseDebut);
+                        const pauseFinDate = parseTime(pauseFin);
+                        const pauseMs = pauseFinDate - pauseDebutDate;
+                        dureePause = Math.floor(pauseMs / 60000);
+                    }
+
+                    const dureeTravail = Math.max(0, diffMinutes - dureePause);
+
+                    // Calculate delay (assuming 8:00 AM as normal start time)
+                    const heureNormale = new Date(2000, 0, 1, 8, 0); // 8:00 AM
+                    const retardMinutes = arriveeDate > heureNormale ?
+                        Math.floor((arriveeDate - heureNormale) / 60000) : 0;
+
+                    // Update interface
+                    document.getElementById('dureeTravail').textContent =
+                        `${Math.floor(dureeTravail / 60)}h${(dureeTravail % 60).toString().padStart(2, '0')}`;
+
+                    document.getElementById('dureePause').textContent =
+                        dureePause > 0 ? `${dureePause} min` : 'Aucune';
+
+                    document.getElementById('retard').textContent =
+                        retardMinutes > 0 ? `${retardMinutes} min` : 'Aucun';
+
+                    document.getElementById('statutCalcul').textContent =
+                        retardMinutes > 0 ? 'Retard' : 'Normal';
+                } else {
+                    // Reset display if not enough data
+                    document.getElementById('dureeTravail').textContent = '--:--';
+                    document.getElementById('dureePause').textContent = '--:--';
+                    document.getElementById('retard').textContent = '--:--';
+                    document.getElementById('statutCalcul').textContent = '-';
+                }
+            } catch (error) {
+                console.error('Erreur dans le calcul des durées:', error);
+            }
+        }
+
+        // Add event listeners safely
+        document.addEventListener('DOMContentLoaded', function () {
+            ['heureArrivee', 'heureDepart', 'heurePauseDebut', 'heurePauseFin'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', calculerDurees);
+                    element.addEventListener('input', calculerDurees);
+                }
+            });
+
+            // Initial calculation
+            calculerDurees();
+        });
+    </script>
+</body>
+
+</html>

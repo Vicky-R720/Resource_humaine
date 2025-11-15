@@ -1,0 +1,164 @@
+// ==================== THYMELEAF VIEW: contract-renew.html ====================
+/*
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Renouveler un Contrat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .old-contract-summary {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #ff9800;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-group label {
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+        .form-group input,
+        .form-group select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🔄 Renouveler le Contrat</h1>
+            
+            <!-- Résumé ancien contrat -->
+            <div class="old-contract-summary">
+                <h3>Ancien contrat</h3>
+                <p><strong>Type:</strong> <span th:text="${oldContract.typeContrat}">-</span></p>
+                <p><strong>Période:</strong> 
+                    <span th:text="${#temporals.format(oldContract.dateDebut, 'dd/MM/yyyy')}">-</span>
+                    → 
+                    <span th:text="${oldContract.dateFin != null ? #temporals.format(oldContract.dateFin, 'dd/MM/yyyy') : 'Indéterminée'}">-</span>
+                </p>
+                <p><strong>Salaire:</strong> 
+                    <span th:text="${oldContract.salaireBase != null ? #numbers.formatDecimal(oldContract.salaireBase, 0, 'COMMA', 0, 'POINT') + ' Ar' : '-'}">-</span>
+                </p>
+            </div>
+            
+            <!-- Formulaire nouveau contrat -->
+            <form th:action="@{/personnel/contracts/{id}/renouveler(id=${oldContract.id})}" 
+                  th:object="${newContract}" 
+                  method="post">
+                <input type="hidden" th:field="*{personnel.id}">
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Type de contrat *</label>
+                        <select th:field="*{typeContrat}" required>
+                            <option value="CDI">CDI</option>
+                            <option value="CDD">CDD</option>
+                            <option value="Stage">Stage</option>
+                            <option value="Essai">Essai</option>
+                            <option value="Freelance">Freelance</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date de début *</label>
+                        <input type="date" th:field="*{dateDebut}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Date de fin</label>
+                        <input type="date" th:field="*{dateFin}">
+                    </div>
+                    <div class="form-group">
+                        <label>Durée période d'essai (mois)</label>
+                        <input type="number" th:field="*{dureeEssaiMois}" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Salaire de base (Ar)</label>
+                        <input type="number" th:field="*{salaireBase}" min="0" step="1000">
+                    </div>
+                    <div class="form-group">
+                        <label>Chemin du document</label>
+                        <input type="text" th:field="*{documentPath}">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <a th:href="@{/personnel/contracts/manage(personnelId=${personnel.id})}" 
+                       class="btn btn-secondary">
+                        ❌ Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        ✅ Renouveler le contrat
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+*/

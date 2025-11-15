@@ -4,10 +4,12 @@ import com.itu.gest_emp.model.AcademicalQualification;
 import com.itu.gest_emp.model.Appliance;
 import com.itu.gest_emp.model.Diploma;
 import com.itu.gest_emp.model.Filiere;
-import com.itu.gest_emp.model.Notification;
 import com.itu.gest_emp.model.Offer;
-import com.itu.gest_emp.model.Person;
 import com.itu.gest_emp.model.Sector;
+import com.itu.gest_emp.modules.shared.model.Notification;
+import com.itu.gest_emp.modules.shared.model.Person;
+import com.itu.gest_emp.modules.shared.service.NotificationService;
+import com.itu.gest_emp.modules.shared.service.PostService;
 import com.itu.gest_emp.service.OfferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,8 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.itu.gest_emp.service.PostService;
-
 import jakarta.servlet.http.HttpSession;
 
 import com.itu.gest_emp.service.AcademicalQualificationServiceImpl;
@@ -27,7 +27,6 @@ import com.itu.gest_emp.service.ContractTypeService;
 import com.itu.gest_emp.service.SectorService;
 import com.itu.gest_emp.service.DiplomaService;
 import com.itu.gest_emp.service.FiliereService;
-import com.itu.gest_emp.service.NotificationService;
 import com.itu.gest_emp.service.ApplianceService;
 
 import java.time.LocalDate;

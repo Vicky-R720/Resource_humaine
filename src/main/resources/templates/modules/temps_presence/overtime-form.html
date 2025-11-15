@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Créer une Heure Supplémentaire</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+    <h1>Créer une nouvelle heure supplémentaire</h1>
+
+    <a th:href="@{/temps_presence/overtime}">Retour à la liste</a>
+
+    <form th:action="@{/temps_presence/overtime/create}" th:object="${overtime}" method="post">
+        <div>
+            <label>Personnel ID :</label>
+            <input type="number" th:field="*{personnelId}" required />
+        </div>
+        <div>
+            <label>Attendance ID :</label>
+            <input type="number" th:field="*{attendanceId}" />
+        </div>
+        <div>
+            <label>Date :</label>
+            <input type="date" th:field="*{dateHs}" required />
+        </div>
+        <div>
+            <label>Nombre d'heures :</label>
+            <input type="number" th:field="*{nombreHeures}" step="0.1" required />
+        </div>
+        <div>
+            <label>Type :</label>
+            <select th:field="*{typeHs}">
+                <option value="jour_normal">Jour normal</option>
+                <option value="dimanche">Dimanche</option>
+                <option value="jours_ferie">Jour férié</option>
+                <option value="nuit">Nuit</option>
+            </select>
+        </div>
+        <div>
+            <label>Salaire horaire de base :</label>
+            <input type="number" th:field="*{salaireHoraireBase}" step="0.01" required />
+        </div>
+        <div>
+            <button type="submit">Créer</button>
+        </div>
+    </form>
+
+    <div th:if="${success}" style="color:green" th:text="${success}"></div>
+    <div th:if="${error}" style="color:red" th:text="${error}"></div>
+</body>
+
+</html>
