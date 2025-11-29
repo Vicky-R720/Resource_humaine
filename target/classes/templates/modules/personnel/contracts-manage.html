@@ -1,0 +1,396 @@
+<!-- // ==================== THYMELEAF VIEW: contracts-manage.html ==================== -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Contrats</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+            display: inline-block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .alert-error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+
+        .employee-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            color: #2196F3;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1976D2;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+            font-size: 12px;
+            padding: 8px 16px;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+            font-size: 12px;
+            padding: 8px 16px;
+        }
+
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+            font-size: 12px;
+            padding: 8px 16px;
+        }
+
+        .btn-secondary {
+            background: #9e9e9e;
+            color: white;
+            font-size: 12px;
+            padding: 8px 16px;
+        }
+
+        .contracts-list {
+            margin-top: 30px;
+        }
+
+        .contract-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .contract-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .contract-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .badge-actif {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-termine {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a th:href="@{/personnel/{id}(id=${personnel.id})}" class="back-btn">← Retour à la fiche</a>
+
+
+        <div class="card">
+            <h1>📄 Gestion des Contrats</h1>
+
+            <!-- Messages de succès/erreur -->
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+            <!-- Informations employé -->
+            <div class="employee-info">
+                <p><strong>Employé:</strong>
+                    <span th:text="${personnel.person.nom + ' ' + personnel.person.prenom}">-</span>
+                </p>
+                <p><strong>Matricule:</strong> <span th:text="${personnel.matricule}">-</span></p>
+                <p><strong>Poste:</strong>
+                    <span th:text="${personnel.post != null ? personnel.post.name : '-'}">-</span>
+                </p>
+            </div>
+
+            <!-- Formulaire nouveau contrat -->
+            <div class="form-section">
+                <h2 class="section-title">➕ Créer un Nouveau Contrat</h2>
+                <form th:action="@{/personnel/contracts/create}" th:object="${newContract}" method="post">
+                    <input type="hidden" name="personnelId" th:value="${personnel.id}">
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Type de contrat *</label>
+                            <select th:field="*{contractType}" required>
+                                <option value="">Sélectionner...</option>
+                                <option th:each="contractType : ${contractTypes}" th:value="${contractType.id}"
+                                    th:text="${contractType.code}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Date de début *</label>
+                            <input type="date" th:field="*{dateDebut}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Date de fin</label>
+                            <input type="date" th:field="*{dateFin}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Durée période d'essai (mois)</label>
+                            <input type="number" th:field="*{dureeEssaiMois}" min="0" value="0">
+                        </div>
+
+                        <!-- 👉 AJOUT DU CHAMP PREAVIS ICI -->
+                        <div class="form-group">
+                            <label>Durée du préavis (jours)</label>
+                            <input type="number" th:field="*{dureePreavis}" min="0" placeholder="Ex : 30">
+                        </div>
+                        <!-- 👆 FIN AJOUT -->
+
+                        <div class="form-group">
+                            <label>Salaire de base (Ar)</label>
+                            <input type="number" th:field="*{salaireBase}" min="0" step="1000">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Chemin du document</label>
+                            <input type="text" th:field="*{documentPath}" placeholder="/documents/contrat.pdf">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button type="submit" class="btn btn-primary">✅ Créer le contrat</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Liste des contrats -->
+            <div class="contracts-list">
+                <h2 class="section-title">📋 Historique des Contrats</h2>
+
+                <div th:if="${#lists.isEmpty(contracts)}">
+                    <p style="color: #666;">Aucun contrat trouvé.</p>
+                </div>
+
+                <div th:each="contract : ${contracts}" class="contract-item">
+                    <div class="contract-header">
+                        <div>
+                            <h3 th:text="${contract.contractType.code}">CDI</h3>
+                            <span class="badge"
+                                th:classappend="${contract.statut == 'actif' ? 'badge-actif' : 'badge-termine'}"
+                                th:text="${contract.statut}">actif</span>
+                        </div>
+                        <div class="contract-actions">
+                            <!-- Boutons validation période d'essai -->
+                            <form
+                                th:if="${contract.dureeEssaiMois > 0 && !contract.isEssaiValide && contract.statut == 'actif'}"
+                                th:action="@{/personnel/contracts/{id}/valider-essai(id=${contract.id})}" method="post"
+                                style="display: inline;">
+                                <input type="hidden" name="personnelId" th:value="${personnel.id}">
+                                <input type="hidden" name="valide" value="true">
+                                <button type="submit" class="btn btn-success">✅ Valider essai</button>
+                            </form>
+
+                            <form
+                                th:if="${contract.dureeEssaiMois > 0 && !contract.isEssaiValide && contract.statut == 'actif'}"
+                                th:action="@{/personnel/contracts/{id}/valider-essai(id=${contract.id})}" method="post"
+                                style="display: inline;">
+                                <input type="hidden" name="personnelId" th:value="${personnel.id}">
+                                <input type="hidden" name="valide" value="false">
+                                <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Êtes-vous sûr de refuser cette période d\'essai ?')">
+                                    ❌ Refuser
+                                </button>
+                            </form>
+
+                            <!-- Bouton demande de rupture -->
+                            <a th:if="${contract.statut == 'actif'}"
+                                th:href="@{/personnel/contracts/{id}/rupture/demande(id=${contract.id})}"
+                                class="btn btn-danger">
+                                ❌ Demander rupture
+                            </a>
+
+                            <!-- Bouton renouvellement -->
+                            <a th:if="${contract.statut == 'actif'}"
+                                th:href="@{/personnel/contracts/{id}/renouveler(id=${contract.id})}"
+                                class="btn btn-warning">
+                                🔄 Renouveler
+                            </a>
+
+                            <!-- Bouton suppression -->
+                            <form th:action="@{/personnel/contracts/{id}/delete(id=${contract.id})}" method="post"
+                                style="display: inline;">
+                                <input type="hidden" name="personnelId" th:value="${personnel.id}">
+                                <button type="submit" class="btn btn-secondary"
+                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?')">
+                                    🗑️ Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Afficher les demandes de rupture en cours -->
+                    <!-- <div th:if="${contract.demandeRuptureEnCours != null}"
+                        style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 6px;">
+                        <p><strong>⚠️ Demande de rupture en cours</strong></p>
+                        <p>Statut: <span class="badge"
+                                th:classappend="${'badge-' + contract.demandeRuptureEnCours.statut.cssClass}"
+                                th:text="${contract.demandeRuptureEnCours.statut.label}"></span></p>
+                        <p>Motif: <span th:text="${contract.demandeRuptureEnCours.motif}">-</span></p>
+                        <p>Date demandée: <span
+                                th:text="${#temporals.format(contract.demandeRuptureEnCours.dateEffetSouhaitee, 'dd/MM/yyyy')}">-</span>
+                        </p>
+                    </div> -->
+
+                    <!-- Reste des informations du contrat -->
+                    <p><strong>Période:</strong>
+                        <span th:text="${#temporals.format(contract.dateDebut, 'dd/MM/yyyy')}">-</span>
+                        →
+                        <span
+                            th:text="${contract.dateFin != null ? #temporals.format(contract.dateFin, 'dd/MM/yyyy') : 'Indéterminée'}">-</span>
+                    </p>
+
+                    <p><strong>Salaire:</strong>
+                        <span th:if="${contract.salaireBase != null}"
+                            th:text="${#numbers.formatDecimal(contract.salaireBase, 0, 'COMMA', 0, 'POINT') + ' Ar'}">-</span>
+                        <span th:unless="${contract.salaireBase != null}">-</span>
+                    </p>
+
+                    <p th:if="${contract.dureeEssaiMois > 0}">
+                        <strong>Période d'essai:</strong>
+                        <span th:text="${contract.dureeEssaiMois}">0</span> mois
+                        (jusqu'au <span th:text="${#temporals.format(contract.dateFinEssai, 'dd/MM/yyyy')}">-</span>)
+                        <span th:if="${contract.isEssaiValide}"> - ✅ Validée</span>
+                        <span th:unless="${contract.isEssaiValide}"> - ⏳ En cours</span>
+                    </p>
+
+                    <p th:if="${contract.motifFin != null}">
+                        <strong>Motif de fin:</strong> <span th:text="${contract.motifFin}">-</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

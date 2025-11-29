@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Détail bulletin</title>
+
+    <style>
+        body {
+            background: #f3f3f3;
+            font-family: Arial;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f8f8;
+        }
+
+        .amount {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #007bff;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 30px;
+            margin-top: 10px;
+        }
+
+        .info-label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <a href="/modules/paie/bulletins" class="btn btn-primary">Retour</a>
+
+        <!-- ===================== ENTÊTE BULLETIN ====================== -->
+        <div class="card">
+            <h2>Bulletin de paie :
+                <span th:text="${bulletin.personnel.person.fullName}"></span>
+            </h2>
+
+            <p>Période :
+                <strong th:text="${bulletin.mois + '/' + bulletin.annee}"></strong>
+            </p>
+
+            <p>Statut :
+                <strong th:text="${bulletin.statut}"></strong>
+            </p>
+        </div>
+
+        <!-- ===================== INFORMATIONS DU SALARIÉ ====================== -->
+        <div class="card">
+            <h3>Informations du salarié</h3>
+
+            <div class="info-grid">
+
+                <div><span class="info-label">Matricule :</span>
+                    <span th:text="${bulletin.personnel.matricule}"></span>
+                </div>
+
+                <div><span class="info-label">Fonction :</span>
+                    <span th:text="${bulletin.personnel.post != null ? bulletin.personnel.post.name : ''}"></span>
+                </div>
+
+                <div><span class="info-label">N° CNaPS :</span>
+                    <span th:text="${bulletin.personnel.numeroCnaps}"></span>
+                </div>
+
+                <div><span class="info-label">N° OSTIE :</span>
+                    <span th:text="${bulletin.personnel.numeroOstie}"></span>
+                </div>
+
+                <div><span class="info-label">Date d'embauche :</span>
+                    <span th:text="${#temporals.format(bulletin.personnel.dateEmbauche, 'dd/MM/yyyy')}"></span>
+                </div>
+
+                <div><span class="info-label">Ancienneté :</span>
+                    <span th:text="${anciennete}"></span>
+                </div>
+
+                <div><span class="info-label">Salaire de base :</span>
+                    <span th:text="${#numbers.formatInteger(bulletin.salaireBase,0,'WHITESPACE')} + ' Ar'"></span>
+                </div>
+
+                <div><span class="info-label">Taux journalier :</span>
+                    <span th:text="${#numbers.formatInteger(snapshot.tauxJournalier,0,'WHITESPACE')} + ' Ar'"></span>
+                </div>
+
+                <div><span class="info-label">Taux horaire :</span>
+                    <span th:text="${#numbers.formatInteger(snapshot.tauxHoraire,0,'WHITESPACE')} + ' Ar'"></span>
+                </div>
+
+
+
+            </div>
+        </div>
+
+        <!-- ===================== TABLEAU DES LIGNES ====================== -->
+        <div class="card">
+            <h3>Détails</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Désignation</th>
+                        <th>Type</th>
+                        <th>Taux</th>
+                        <th>Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="l : ${bulletin.lignes}">
+                        <td th:text="${l.code}"></td>
+                        <td th:text="${l.label}"></td>
+                        <td th:text="${l.type}"></td>
+                        <td th:text="${l.taux != null ? l.taux : ''}"></td>
+                        <td class="amount" th:text="${#numbers.formatInteger(l.montant,0,'WHITESPACE')} + ' Ar'">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===================== TOTAL FINAL ====================== -->
+        <div class="card">
+            <h3>Total</h3>
+
+            <p>Total Brut :
+                <strong th:text="${#numbers.formatInteger(bulletin.totalBrut,0,'WHITESPACE')} + ' Ar'"></strong>
+            </p>
+
+            <p>Total Retenues :
+                <strong th:text="${#numbers.formatInteger(bulletin.totalRetenues,0,'WHITESPACE')} + ' Ar'"></strong>
+            </p>
+
+            <p>Net à payer :
+                <strong th:text="${#numbers.formatInteger(bulletin.netAPayer,0,'WHITESPACE')} + ' Ar'"></strong>
+            </p>
+        </div>
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <title>Nouveau Pointage</title>
+
+    <style>
+        .page-container {
+            padding: 20px;
+            max-width: 900px;
+            margin: auto;
+        }
+        h1, h2, h3, h4 { margin-bottom: 15px; }
+        .box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        input, select, textarea {
+            padding: 7px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .small-box {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 5px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-secondary { background: #777; }
+        .error { color: red; font-size: 12px; margin-top: 4px; }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="page-container">
+
+            <h1>
+                <span th:if="${attendance != null}">Modifier le Pointage</span>
+                <span th:unless="${attendance != null}">Nouveau Pointage</span>
+            </h1>
+
+            <div class="box">
+                <h3>Informations du Pointage</h3>
+
+                <form th:action="@{/temps-presence/attendance/create}" method="post" th:object="${attendance}">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="personnelId">Personnel *</label>
+                            <select id="personnelId" th:field="*{personnelId}" required>
+                                <option value="">Sélectionner</option>
+                                <option th:each="personnel : ${personnels}" th:value="${personnel.id}"
+                                        th:text="${personnel.person.nom + ' ' + personnel.person.prenom}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="datePointage">Date *</label>
+                            <input type="date" id="datePointage" th:field="*{datePointage}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="heureArrivee">Heure Arrivée</label>
+                            <input type="time" id="heureArrivee" th:field="*{heureArrivee}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="heureDepart">Heure Départ</label>
+                            <input type="time" id="heureDepart" th:field="*{heureDepart}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="heurePauseDebut">Début Pause</label>
+                            <input type="time" id="heurePauseDebut" th:field="*{heurePauseDebut}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="heurePauseFin">Fin Pause</label>
+                            <input type="time" id="heurePauseFin" th:field="*{heurePauseFin}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="typePointage">Type</label>
+                            <select id="typePointage" th:field="*{typePointage}">
+                                <option value="manuel">Manuel</option>
+                                <option value="badgeuse">Badgeuse</option>
+                                <option value="mobile">Mobile</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="statut">Statut *</label>
+                            <select id="statut" th:field="*{statut}" required>
+                                <option value="present">Present</option>
+                                <option value="absent">Absent</option>
+                                <option value="conge">Congé</option>
+                                <option value="maladie">Maladie</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="commentaire">Commentaire</label>
+                        <textarea id="commentaire" rows="3" th:field="*{commentaire}"></textarea>
+                    </div>
+
+                    <div>
+                        <label>
+                            <input type="checkbox" id="isValidated" th:field="*{isValidated}">
+                            Pointage validé
+                        </label>
+                    </div>
+
+                    <div class="buttons">
+                        <a th:href="@{/temps-presence/attendance}" class="btn btn-secondary">Annuler</a>
+                        <button type="submit" class="btn">
+                            <span th:if="${attendance != null and attendance.id != null}">Modifier</span>
+                            <span th:unless="${attendance != null and attendance.id != null}">Enregistrer</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="box">
+                <h3>Aperçu des Calculs</h3>
+                <div class="form-row">
+                    <div class="small-box">
+                        <h4 id="dureeTravail">--:--</h4>
+                        <small>Durée Travail</small>
+                    </div>
+                    <div class="small-box">
+                        <h4 id="dureePause">--:--</h4>
+                        <small>Pause</small>
+                    </div>
+                    <div class="small-box">
+                        <h4 id="retard">--:--</h4>
+                        <small>Retard</small>
+                    </div>
+                    <div class="small-box">
+                        <h4 id="statutCalcul">-</h4>
+                        <small>Statut Calculé</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        /** DISABLE FIELDS WHEN STATUT = ABSENT **/
+        function toggleAbsenceFields() {
+            const statut = document.getElementById("statut").value;
+
+            const fields = [
+                "heureArrivee",
+                "heureDepart",
+                "heurePauseDebut",
+                "heurePauseFin",
+                "typePointage",
+                "commentaire",
+                "isValidated"
+            ];
+
+            const disable = (statut === "absent");
+
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.disabled = disable;
+                    if (disable) el.value = "";
+                }
+            });
+        }
+
+        // Existing calculation script preserved
+        function calculerDurees() {
+            try {
+                const arrivee = document.getElementById('heureArrivee')?.value;
+                const depart = document.getElementById('heureDepart')?.value;
+                const pauseDebut = document.getElementById('heurePauseDebut')?.value;
+                const pauseFin = document.getElementById('heurePauseFin')?.value;
+
+                if (arrivee && depart) {
+                    const parseTime = (t) => {
+                        const [h, m] = t.split(':').map(Number);
+                        return new Date(2000, 0, 1, h, m);
+                    };
+
+                    const a = parseTime(arrivee);
+                    const d = parseTime(depart);
+                    const diff = (d - a) / 60000;
+
+                    let pause = 0;
+                    if (pauseDebut && pauseFin) {
+                        pause = (parseTime(pauseFin) - parseTime(pauseDebut)) / 60000;
+                    }
+
+                    const work = Math.max(0, diff - pause);
+
+                    const hNorm = new Date(2000, 0, 1, 8, 0);
+                    const retard = a > hNorm ? Math.floor((a - hNorm) / 60000) : 0;
+
+                    document.getElementById('dureeTravail').textContent =
+                        `${Math.floor(work / 60)}h${String(work % 60).padStart(2, '0')}`;
+
+                    document.getElementById('dureePause').textContent =
+                        pause > 0 ? `${pause} min` : "Aucune";
+
+                    document.getElementById('retard').textContent =
+                        retard > 0 ? `${retard} min` : "Aucun";
+
+                    document.getElementById('statutCalcul').textContent =
+                        retard > 0 ? "Retard" : "Normal";
+
+                } else {
+                    document.getElementById('dureeTravail').textContent = "--:--";
+                    document.getElementById('dureePause').textContent = "--:--";
+                    document.getElementById('retard').textContent = "--:--";
+                    document.getElementById('statutCalcul').textContent = "-";
+                }
+
+            } catch (e) { console.error(e); }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            toggleAbsenceFields(); // au chargement
+
+            const statut = document.getElementById("statut");
+            statut.addEventListener("change", toggleAbsenceFields);
+
+            ["heureArrivee", "heureDepart", "heurePauseDebut", "heurePauseFin"]
+                .forEach(id => {
+                    const e = document.getElementById(id);
+                    if (e) {
+                        e.addEventListener("change", calculerDurees);
+                        e.addEventListener("input", calculerDurees);
+                    }
+                });
+
+            calculerDurees();
+        });
+
+    </script>
+</body>
+</html>

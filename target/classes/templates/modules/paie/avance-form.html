@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nouvelle demande d'avance</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#f3f3f3 }
+        .container { max-width:800px; margin:auto; padding:20px }
+        .card { background:white; padding:20px; border-radius:8px }
+        .form-group { margin-bottom:12px }
+        label { display:block; font-weight:bold; margin-bottom:6px }
+        input, textarea, select { width:100%; padding:8px; box-sizing:border-box }
+        .btn { padding:8px 14px; color:white; text-decoration:none; border-radius:4px }
+        .btn-primary { background:#007bff }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h2>Nouvelle demande d'avance</h2>
+        <form id="avanceForm">
+            <div class="form-group">
+                <label>Personnel (ID)</label>
+                <input type="number" id="personnelId" name="personnelId" required />
+            </div>
+            <div class="form-group">
+                <label>Montant</label>
+                <input type="number" step="0.01" id="montant" name="montant" required />
+            </div>
+            <div class="form-group">
+                <label>Motif</label>
+                <textarea id="motif" name="motif" rows="3"></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">Envoyer la demande</button>
+            <a href="/modules/paie/avances" style="margin-left:10px">Annuler</a>
+        </form>
+        <div id="msg" style="margin-top:12px"></div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('avanceForm').addEventListener('submit', function(e){
+        e.preventDefault();
+        const payload = {
+            personnelId: Number(document.getElementById('personnelId').value),
+            montant: Number(document.getElementById('montant').value),
+            motif: document.getElementById('motif').value
+        };
+
+        fetch('/api/paie/avances', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(r => r.json())
+          .then(data => {
+              document.getElementById('msg').innerText = 'Demande créée (ID: ' + (data.id || '') + ')';
+              setTimeout(() => window.location.href = '/modules/paie/avances', 1000);
+          }).catch(err => {
+              console.error(err);
+              document.getElementById('msg').innerText = 'Erreur: ' + err;
+          });
+    });
+</script>
+
+</body>
+</html>

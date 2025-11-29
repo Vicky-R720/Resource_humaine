@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Détail avance</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#f3f3f3 }
+        .container { max-width:900px; margin:auto; padding:20px }
+        .card { background:white; padding:20px; border-radius:8px }
+        .btn { padding:8px 14px; border-radius:4px; color:white; text-decoration:none }
+        .btn-primary { background:#007bff }
+        .btn-success { background:#28a745 }
+        .btn-danger { background:#dc3545 }
+        table { width:100%; border-collapse:collapse }
+        th, td { padding:8px; border-bottom:1px solid #eee }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <a href="/modules/paie/avances" class="btn btn-primary">Retour</a>
+        <h2>Détail de la demande d'avance</h2>
+
+        <div th:if="${avance}">
+            <p><strong>ID :</strong> <span th:text="${avance.id}"></span></p>
+            <p><strong>Employé :</strong> <span th:text="${avance.personnel.person.fullName}"></span></p>
+            <p><strong>Montant :</strong> <span th:text="${#numbers.formatInteger(avance.montant,0,'WHITESPACE')} + ' Ar'"></span></p>
+            <p><strong>Motif :</strong> <span th:text="${avance.motif}"></span></p>
+            <p><strong>Date demande :</strong> <span th:text="${#temporals.format(avance.dateDemande,'dd/MM/yyyy')}"></span></p>
+            <p><strong>Statut :</strong> <span th:text="${avance.statut}"></span></p>
+
+            <div th:if="${avance.statut == T(com.itu.gest_emp.modules.paie.model.AvanceStatus).DEMANDEE}">
+                <h4>Actions RH</h4>
+                <form id="approveForm" style="display:inline-block; margin-right:8px">
+                    <input type="hidden" id="approbateurId" value="" />
+                    <input type="text" id="commentaireApp" placeholder="Commentaire (optionnel)" />
+                    <button class="btn btn-success" type="button" onclick="approve()">Approuver</button>
+                </form>
+                <form id="rejectForm" style="display:inline-block">
+                    <input type="text" id="commentaireRej" placeholder="Commentaire (optionnel)" />
+                    <button class="btn btn-danger" type="button" onclick="reject()">Refuser</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="msg" style="margin-top:12px"></div>
+    </div>
+</div>
+
+<script>
+    // If server didn't provide 'avance' model, fetch it via API
+    (function(){
+        const id = window.location.pathname.split('/').pop();
+        if (!id || isNaN(id)) return;
+        const hasModel = /*[[${avance}]]*/ false;
+        if (!hasModel) {
+            fetch('/api/paie/avances') // list to find one - but better would be dedicated endpoint; fallback:
+                .then(r => r.json())
+                .then(all => {
+                    const a = all.find(x => String(x.id) === String(id));
+                    if (!a) return;
+                    document.querySelector('span[th\:text="${avance.id}"]').innerText = a.id;
+                }).catch(()=>{});
+        }
+    })();
+
+    function getApprobateurId() {
+        // TODO: replace with current user id from session; for now read from input
+        return 6;
+    }
+
+    function approve(){
+        const id = window.location.pathname.split('/').pop();
+        const appro = getApprobateurId();
+        const commentaire = document.getElementById('commentaireApp').value;
+        if (!appro) { document.getElementById('msg').innerText = 'Entrez l\'ID de l\'approbateur (utilisateur) dans le champ caché.'; return; }
+
+        fetch('/api/paie/avances/' + id + '/approve', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ approbateurUtilisateurId: appro, commentaire:commentaire })
+        }).then(r=>r.json()).then(d=>{
+            document.getElementById('msg').innerText = 'Demande approuvée.'; setTimeout(()=> location.reload(),800);
+        }).catch(e=> document.getElementById('msg').innerText = 'Erreur: ' + e);
+    }
+
+    function reject(){
+        const id = window.location.pathname.split('/').pop();
+        const appro = getApprobateurId();
+        const commentaire = document.getElementById('commentaireRej').value;
+        if (!appro) { document.getElementById('msg').innerText = 'Entrez l\'ID de l\'approbateur (utilisateur) dans le champ caché.'; return; }
+        fetch('/api/paie/avances/' + id + '/reject', {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ approbateurUtilisateurId: appro, commentaire:commentaire })
+        }).then(r=>r.json()).then(d=>{
+            document.getElementById('msg').innerText = 'Demande refusée.'; setTimeout(()=> location.reload(),800);
+        }).catch(e=> document.getElementById('msg').innerText = 'Erreur: ' + e);
+    }
+</script>
+
+</body>
+</html>
