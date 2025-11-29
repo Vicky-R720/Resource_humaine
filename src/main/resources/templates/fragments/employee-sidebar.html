@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="sidebar">
+    <div class="list-group">
+        <a th:href="@{/employee/self-service/dashboard}" class="list-group-item list-group-item-action">
+            <i class="fas fa-tachometer-alt me-2"></i>
+            Tableau de bord
+        </a>
+        <a th:href="@{/employee/self-service/personal-info}" class="list-group-item list-group-item-action">
+            <i class="fas fa-user me-2"></i>
+            Informations personnelles
+        </a>
+        <a th:href="@{/employee/self-service/leaves}" class="list-group-item list-group-item-action">
+            <i class="fas fa-calendar-alt me-2"></i>
+            Congés
+        </a>
+        <a th:href="@{/employee/self-service/payslips}" class="list-group-item list-group-item-action">
+            <i class="fas fa-file-invoice-dollar me-2"></i>
+            Bulletins de paie
+        </a>
+        <a th:href="@{/employee/self-service/requests}" class="list-group-item list-group-item-action">
+            <i class="fas fa-paper-plane me-2"></i>
+            Mes demandes
+        </a>
+        <!-- Dans templates/fragments/header.html -->
+            <a class="nav-link" href="/manager/predictions">📊 Prédictions</a>
+            <a class="nav-link" href="/employee/chatbot">🤖 Chatbot RH</a>
+    </div>
+</div>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pyramide des Âges Interactive</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2rem;
+        }
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        .control-group {
+            flex: 1;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .control-group select,
+        .control-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 500px;
+        }
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .stat-box {
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Pyramide des Âges - Analyse Interactive</h1>
+        
+        <!-- Contrôles -->
+        <div class="controls">
+            <div class="control-group">
+                <label for="trancheSize">Taille des Tranches</label>
+                <select id="trancheSize" onchange="updateChart()">
+                    <option value="5">5 ans (20-24, 25-29...)</option>
+                    <option value="10" selected>10 ans (20-29, 30-39...)</option>
+                    <option value="15">15 ans (20-34, 35-49...)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="minAge">Âge Minimum</label>
+                <input type="number" id="minAge" value="20" min="18" max="60" onchange="updateChart()">
+            </div>
+            
+            <div class="control-group">
+                <label for="maxAge">Âge Maximum</label>
+                <input type="number" id="maxAge" value="70" min="30" max="80" onchange="updateChart()">
+            </div>
+        </div>
+        
+        <!-- Graphique -->
+        <div class="chart-container">
+            <canvas id="ageChart"></canvas>
+        </div>
+        
+        <!-- Statistiques Résumées -->
+        <div class="stats-summary">
+            <div class="stat-box">
+                <div class="stat-value" id="totalEmployees">0</div>
+                <div class="stat-label">Total Employés</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="avgAge">0</div>
+                <div class="stat-label">Âge Moyen</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="mostCommonRange">-</div>
+                <div class="stat-label">Tranche la Plus Représentée</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value" id="emptyRanges">0</div>
+                <div class="stat-label">Tranches Vides</div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Données depuis le serveur (exemple avec vos 10 employés)
+        const employeeAges = /*[[${employeeAges}]]*/ [
+            40, 35, 43, 37, 33, 38, 41, 34, 39, 36
+        ]; // Ages calculés depuis les dates de naissance
+        /*]]>*/
+        
+        let currentChart = null;
+        
+        function generateAgeRanges(trancheSize, minAge, maxAge) {
+            const ranges = [];
+            const labels = [];
+            const data = [];
+            
+            // Tranche inférieure
+            labels.push(`<${minAge} ans`);
+            data.push(employeeAges.filter(age => age < minAge).length);
+            
+            // Tranches principales
+            for (let age = minAge; age < maxAge; age += trancheSize) {
+                const endAge = age + trancheSize - 1;
+                const label = `${age}-${endAge} ans`;
+                labels.push(label);
+                
+                const count = employeeAges.filter(a => a >= age && a <= endAge).length;
+                data.push(count);
+            }
+            
+            // Tranche supérieure
+            labels.push(`${maxAge}+ ans`);
+            data.push(employeeAges.filter(age => age >= maxAge).length);
+            
+            return { labels, data };
+        }
+        
+        function updateChart() {
+            const trancheSize = parseInt(document.getElementById('trancheSize').value);
+            const minAge = parseInt(document.getElementById('minAge').value);
+            const maxAge = parseInt(document.getElementById('maxAge').value);
+            
+            const { labels, data } = generateAgeRanges(trancheSize, minAge, maxAge);
+            
+            // Couleurs dynamiques
+            const colors = data.map(value => {
+                if (value === 0) return '#e5e7eb'; // Gris
+                if (value >= 3) return '#10b981'; // Vert
+                if (value >= 2) return '#3b82f6'; // Bleu
+                return '#f59e0b'; // Orange
+            });
+            
+            // Détruire l'ancien graphique
+            if (currentChart) {
+                currentChart.destroy();
+            }
+            
+            // Créer le nouveau graphique
+            const ctx = document.getElementById('ageChart').getContext('2d');
+            currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nombre d\'Employés',
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    const total = employeeAges.length;
+                                    const percent = ((value / total) * 100).toFixed(1);
+                                    return `${value} employés (${percent}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Mettre à jour les statistiques
+            updateStats(labels, data);
+        }
+        
+        function updateStats(labels, data) {
+            // Total
+            const total = data.reduce((sum, val) => sum + val, 0);
+            document.getElementById('totalEmployees').textContent = total;
+            
+            // Âge moyen
+            const avgAge = (employeeAges.reduce((sum, age) => sum + age, 0) / employeeAges.length).toFixed(1);
+            document.getElementById('avgAge').textContent = avgAge + ' ans';
+            
+            // Tranche la plus représentée
+            const maxValue = Math.max(...data);
+            const maxIndex = data.indexOf(maxValue);
+            document.getElementById('mostCommonRange').textContent = labels[maxIndex];
+            
+            // Tranches vides
+            const emptyCount = data.filter(v => v === 0).length;
+            document.getElementById('emptyRanges').textContent = emptyCount;
+        }
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            updateChart();
+        });
+    </script>
+    <!--]]>-->
+</body>
+</html>
