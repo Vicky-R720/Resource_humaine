@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="sidebar">
+    <div class="list-group">
+        <a th:href="@{/manager/dashboard}" class="list-group-item list-group-item-action">
+            <i class="fas fa-tachometer-alt me-2"></i>
+            Tableau de bord
+        </a>
+        <a th:href="@{/manager/team}" class="list-group-item list-group-item-action">
+            <i class="fas fa-users me-2"></i>
+            Mon équipe
+        </a>
+        <a th:href="@{/manager/leaves}" class="list-group-item list-group-item-action">
+            <i class="fas fa-calendar-check me-2"></i>
+            Validation congés
+        </a>
+        <a th:href="@{/manager/performance}" class="list-group-item list-group-item-action">
+            <i class="fas fa-chart-line me-2"></i>
+            Performances
+        </a>
+        <a th:href="@{/manager/attendance}" class="list-group-item list-group-item-action">
+            <i class="fas fa-clipboard-list me-2"></i>
+            Présences
+        </a>
+    </div>
+</div>
+</html>

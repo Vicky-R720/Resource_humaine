@@ -73,7 +73,7 @@ public class RegisterController {
             personService.savePerson(newPerson);
 
             model.addAttribute("success", "Inscription réussie ! Vous pouvez maintenant vous connecter.");
-            return "login";
+            return "login2";
 
         } catch (Exception e) {
             model.addAttribute("error", "Erreur lors de l'inscription: " + e.getMessage());

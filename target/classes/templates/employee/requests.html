@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mes Demandes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/employee/self-service/dashboard}">
+                <i class="fas fa-users me-2"></i>
+                Espace Employé
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown" th:if="${currentUser != null}">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user me-1"></i>
+                        <span th:text="${currentUser.person.nom + ' ' + currentUser.person.prenom}">Utilisateur</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <span class="dropdown-item-text small">
+                                <strong>Matricule:</strong> 
+                                <span th:text="${currentUser.matricule}">EMP001</span>
+                            </span>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/employee/self-service/personal-info}">
+                                <i class="fas fa-user-edit me-2"></i>
+                                Mon profil
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/auth/logout}">
+                                <i class="fas fa-sign-out-alt me-2"></i>
+                                Déconnexion
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-3">
+                <!-- Sidebar -->
+                <div class="list-group">
+                    <a th:href="@{/employee/self-service/dashboard}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        Tableau de bord
+                    </a>
+                    <a th:href="@{/employee/self-service/personal-info}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user me-2"></i>
+                        Informations personnelles
+                    </a>
+                    <a th:href="@{/employee/self-service/leaves}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        Congés
+                    </a>
+                    <a th:href="@{/employee/self-service/payslips}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>
+                        Bulletins de paie
+                    </a>
+                    <a th:href="@{/employee/self-service/requests}" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        Mes demandes
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Mes Demandes</h2>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#requestModal">
+                        <i class="fas fa-plus me-2"></i>
+                        Nouvelle demande
+                    </button>
+                </div>
+
+                <!-- CORRECTION : Alertes simplifiées -->
+                <div th:if="${param.success != null}" class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span th:text="${param.success}">Succès</span>
+                </div>
+
+                <div th:if="${param.error != null}" class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span th:text="${param.error}">Erreur</span>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <!-- CORRECTION : Vérification simplifiée -->
+                        <div th:if="${requests == null or #lists.isEmpty(requests)}" class="text-center text-muted">
+                            <p>Aucune demande</p>
+                        </div>
+                        <div th:if="${requests != null and not #lists.isEmpty(requests)}" class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                        <th>Montant</th>
+                                        <th>Statut</th>
+                                        <th>Date demande</th>
+                                        <th>Document</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="request : ${requests}">
+                                        <td th:text="${request.typeDemande}">attestation_travail</td>
+                                        <td th:text="${request.description}">Demande d'attestation de travail</td>
+                                        <td th:text="${request.montantDemande != null} ? ${#numbers.formatCurrency(request.montantDemande)} : 'N/A'">N/A</td>
+                                        <td>
+                                            <span th:class="${'badge ' + (request.statut == 'approuve' ? 'bg-success' : request.statut == 'refuse' ? 'bg-danger' : request.statut == 'en_attente' ? 'bg-warning' : 'bg-secondary')}"
+                                                  th:text="${request.statut}">en_attente</span>
+                                        </td>
+                                        <td th:text="${request.createdAt != null} ? ${#temporals.format(request.createdAt, 'dd/MM/yyyy HH:mm')} : 'N/A'">16/11/2025 18:00</td>
+                                        <td>
+                                            <a th:if="${request.documentGenerePath != null}" 
+                                               th:href="@{/download/{path}(path=${request.documentGenerePath})}"
+                                               class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour nouvelle demande -->
+    <div class="modal fade" id="requestModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nouvelle demande</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form th:action="@{/employee/self-service/requests/submit}" th:object="${newRequest}" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Type de demande</label>
+                            <select class="form-select" th:field="*{typeDemande}" required>
+                                <option value="">Sélectionnez un type</option>
+                                <option value="attestation_travail">Attestation de travail</option>
+                                <option value="attestation_salaire">Attestation de salaire</option>
+                                <option value="remboursement">Remboursement</option>
+                                <option value="avance">Avance sur salaire</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" th:field="*{description}" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Montant demandé (le cas échéant)</label>
+                            <input type="number" class="form-control" th:field="*{montantDemande}" step="0.01">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Soumettre</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

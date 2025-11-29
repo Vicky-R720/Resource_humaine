@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Postes</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link th:href="@{/bootstrap-5.3.8-dist/css/bootstrap.min.css}" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Gestion des Postes</h1>
+        
+        <!-- Formulaire d'ajout/modification -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 id="formTitle">Ajouter un nouveau poste</h5>
+            </div>
+            <div class="card-body">
+                <form id="postForm">
+                    <input type="hidden" id="postId">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nom du poste *</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="missions" class="form-label">Missions</label>
+                        <textarea class="form-control" id="missions" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Annuler</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Recherche -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Rechercher des postes</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group mb-3">
+                            <input type="text" id="searchName" class="form-control" placeholder="Rechercher par nom...">
+                            <button class="btn btn-outline-secondary" onclick="searchByName()">Rechercher</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group mb-3">
+                            <input type="text" id="searchDescription" class="form-control" placeholder="Rechercher par description...">
+                            <button class="btn btn-outline-secondary" onclick="searchByDescription()">Rechercher</button>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-outline-primary" onclick="loadPosts()">Afficher tous les postes</button>
+            </div>
+        </div>
+
+        <!-- Tableau des postes -->
+        <div class="card">
+            <div class="card-header">
+                <h5>Liste des postes</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Description</th>
+                                <th>Missions</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="postsTable">
+                            <!-- Les données seront chargées ici dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>
