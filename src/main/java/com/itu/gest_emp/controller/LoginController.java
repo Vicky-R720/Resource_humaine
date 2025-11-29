@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.ui.Model;
-import com.itu.gest_emp.model.*;
+import com.itu.gest_emp.modules.personnel.model.PersonnelRh;
 import com.itu.gest_emp.repository.*;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,20 +40,21 @@ public class LoginController {
             RedirectAttributes redirectAttributes) {
         try {
             // Rechercher l'employé par matricule ou contact
-            Optional<PersonnelRH> personnelOpt = personnelRHRepository.findByIdentifier(loginRequest.getUsername());
+            Optional<PersonnelRh> personnelOpt = personnelRHRepository.findByIdentifier(loginRequest.getUsername());
 
             if (personnelOpt.isEmpty()) {
-                System.out.println("Aucun employé trouvé avec le matricule ou email fourni" + loginRequest.getUsername());
+                System.out
+                        .println("Aucun employé trouvé avec le matricule ou email fourni" + loginRequest.getUsername());
                 redirectAttributes.addFlashAttribute("error", "Matricule ou email incorrect");
                 return "redirect:/auth/login";
             }
 
-            PersonnelRH personnel = personnelOpt.get();
+            PersonnelRh personnel = personnelOpt.get();
 
             // Vérifier le statut
             // if (!"actif".equals(personnel.getStatut())) {
-            //     redirectAttributes.addFlashAttribute("error", "Votre compte est désactivé");
-            //     return "redirect:/auth/login";
+            // redirectAttributes.addFlashAttribute("error", "Votre compte est désactivé");
+            // return "redirect:/auth/login";
             // }
 
             // Vérifier le mot de passe (basique pour l'exemple)
@@ -86,7 +87,7 @@ public class LoginController {
         return "redirect:/auth/login";
     }
 
-    private boolean isValidPassword(String inputPassword, PersonnelRH personnel) {
+    private boolean isValidPassword(String inputPassword, PersonnelRh personnel) {
         // Logique de vérification du mot de passe
         // Pour l'exemple, on utilise un mot de passe par défaut
         String defaultPassword = "employe123";

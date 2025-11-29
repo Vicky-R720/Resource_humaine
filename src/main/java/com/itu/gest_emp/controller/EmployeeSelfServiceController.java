@@ -1,27 +1,15 @@
 package com.itu.gest_emp.controller;
 
 
-import com.itu.gest_emp.model.Offer;
-import com.itu.gest_emp.service.OfferService;
 
-import org.hibernate.mapping.Map;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import com.itu.gest_emp.service.*;
-import com.itu.gest_emp.model.*;
-
-import com.itu.gest_emp.service.ContractTypeService;
-import com.itu.gest_emp.service.DiplomaService;
-import com.itu.gest_emp.service.FiliereService;
+import com.itu.gest_emp.modules.personnel.model.PersonnelRh;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.HashMap;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -40,7 +28,7 @@ public class EmployeeSelfServiceController {
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         try {
-            PersonnelRH personnel = authenticationService.getCurrentPersonnel();
+            PersonnelRh personnel = authenticationService.getCurrentPersonnel();
             
             // CORRECTION : Utiliser java.util.Map explicitement
             java.util.Map<String, Object> leaveSummary = employeeSelfService.getLeaveSummary(personnel.getId());
@@ -63,7 +51,7 @@ public class EmployeeSelfServiceController {
     @GetMapping("/personal-info")
     public String personalInfo(Model model) {
         try {
-            PersonnelRH personnel = authenticationService.getCurrentPersonnel();
+            PersonnelRh personnel = authenticationService.getCurrentPersonnel();
             model.addAttribute("personnel", personnel);
             return "employee/personal-info";
         } catch (RuntimeException e) {
@@ -72,10 +60,10 @@ public class EmployeeSelfServiceController {
     }
     
     @PostMapping("/personal-info")
-    public String updatePersonalInfo(@ModelAttribute PersonnelRH personnelInfo, 
+    public String updatePersonalInfo(@ModelAttribute PersonnelRh personnelInfo, 
                                    RedirectAttributes redirectAttributes) {
         try {
-            PersonnelRH personnel = authenticationService.getCurrentPersonnel();
+            PersonnelRh personnel = authenticationService.getCurrentPersonnel();
             employeeSelfService.updatePersonalInfo(personnel.getId(), personnelInfo);
             redirectAttributes.addFlashAttribute("success", "Informations mises à jour avec succès");
             return "redirect:/employee/self-service/personal-info";
@@ -87,7 +75,7 @@ public class EmployeeSelfServiceController {
     @GetMapping("/leaves")
     public String leaves(Model model) {
         try {
-            PersonnelRH personnel = authenticationService.getCurrentPersonnel();
+            PersonnelRh personnel = authenticationService.getCurrentPersonnel();
             
             List<LeaveRequestsRH> leaveRequests = employeeSelfService.getEmployeeLeaveRequests(personnel.getId());
             List<LeaveBalanceRH> leaveBalances = employeeSelfService.getLeaveBalances(personnel.getId());
@@ -107,7 +95,7 @@ public class EmployeeSelfServiceController {
     public String submitLeaveRequest(@ModelAttribute LeaveRequestsRH leaveRequest,
                                    RedirectAttributes redirectAttributes) {
         try {
-            PersonnelRH personnel = authenticationService.getCurrentPersonnel();
+            PersonnelRh personnel = authenticationService.getCurrentPersonnel();
             leaveRequest.setPersonnel(personnel);
             employeeSelfService.submitLeaveRequest(leaveRequest);
             redirectAttributes.addFlashAttribute("success", "Demande de congé soumise avec succès");
@@ -131,7 +119,7 @@ public class EmployeeSelfServiceController {
     @GetMapping("/payslips")
     public String payslips(Model model) {
         try {
-            PersonnelRH personnel = authenticationService.getCurrentPersonnel();
+            PersonnelRh personnel = authenticationService.getCurrentPersonnel();
             List<PayslipsRH> payslips = employeeSelfService.getEmployeePayslips(personnel.getId());
             
             model.addAttribute("personnel", personnel);
@@ -146,7 +134,7 @@ public class EmployeeSelfServiceController {
     @GetMapping("/payslips/{mois}/{annee}")
     public String viewPayslip(@PathVariable Integer mois, @PathVariable Integer annee, Model model) {
         try {
-            PersonnelRH personnel = authenticationService.getCurrentPersonnel();
+            PersonnelRh personnel = authenticationService.getCurrentPersonnel();
             PayslipsRH payslip = employeeSelfService.getPayslip(personnel.getId(), mois, annee)
                     .orElseThrow(() -> new RuntimeException("Bulletin de paie non trouvé"));
             
@@ -162,7 +150,7 @@ public class EmployeeSelfServiceController {
     @GetMapping("/requests")
     public String requests(Model model) {
         try {
-            PersonnelRH personnel = authenticationService.getCurrentPersonnel();
+            PersonnelRh personnel = authenticationService.getCurrentPersonnel();
             List<EmployeeRequestsRH> employeeRequests = employeeSelfService.getEmployeeRequests(personnel.getId());
             
             model.addAttribute("personnel", personnel);
@@ -191,7 +179,7 @@ public class EmployeeSelfServiceController {
     
     // Ajouter le lien de déconnexion dans le header
     @ModelAttribute("currentUser")
-    public PersonnelRH getCurrentUser() {
+    public PersonnelRh getCurrentUser() {
         try {
             return authenticationService.getCurrentPersonnel();
         } catch (Exception e) {

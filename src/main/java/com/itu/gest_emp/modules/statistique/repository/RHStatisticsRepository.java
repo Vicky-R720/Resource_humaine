@@ -1,7 +1,9 @@
-package com.itu.gest_emp.statistique.repository;
+package com.itu.gest_emp.modules.statistique.repository;
 
 import org.springframework.stereotype.Repository;
-import com.itu.gest_emp.statistique.model.StatisticsDTO;
+
+import com.itu.gest_emp.modules.statistique.model.StatisticsDTO;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;

@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.itu.gest_emp.model.DocumentsRH;
-import com.itu.gest_emp.model.PersonnelRH;
+import com.itu.gest_emp.modules.personnel.model.DocumentsRH;
+
 import com.itu.gest_emp.service.DocumentArchivingService;
 import com.itu.gest_emp.service.PersonnelRHService;
 

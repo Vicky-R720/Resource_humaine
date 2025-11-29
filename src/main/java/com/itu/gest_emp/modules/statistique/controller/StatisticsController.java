@@ -1,11 +1,12 @@
-package com.itu.gest_emp.statistique.controller;
+package com.itu.gest_emp.modules.statistique.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import com.itu.gest_emp.statistique.repository.RHStatisticsRepository;
-import com.itu.gest_emp.statistique.model.KPIData;
-import com.itu.gest_emp.statistique.model.StatisticsDTO;
+
+import com.itu.gest_emp.modules.statistique.model.KPIData;
+import com.itu.gest_emp.modules.statistique.model.StatisticsDTO;
+import com.itu.gest_emp.modules.statistique.repository.RHStatisticsRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;

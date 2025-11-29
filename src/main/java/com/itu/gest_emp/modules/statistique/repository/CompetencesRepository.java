@@ -1,8 +1,11 @@
-package com.itu.gest_emp.statistique.repository;
+package com.itu.gest_emp.modules.statistique.repository;
 
 import org.springframework.stereotype.Repository;
-import com.itu.gest_emp.statistique.model.StatisticsDTO;
-import com.itu.gest_emp.statistique.model.CompetenceMatrixDTO;
+
+import com.itu.gest_emp.modules.statistique.model.CompetenceMatrixDTO;
+import com.itu.gest_emp.modules.statistique.model.FormationSuggestionDTO;
+import com.itu.gest_emp.modules.statistique.model.StatisticsDTO;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -13,7 +16,6 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import com.itu.gest_emp.statistique.model.FormationSuggestionDTO;
 
 @Repository
 public class CompetencesRepository {

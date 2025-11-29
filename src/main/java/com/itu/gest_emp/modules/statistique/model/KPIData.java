@@ -1,4 +1,4 @@
-package com.itu.gest_emp.statistique.model;
+package com.itu.gest_emp.modules.statistique.model;
 
 import java.math.BigDecimal;
 

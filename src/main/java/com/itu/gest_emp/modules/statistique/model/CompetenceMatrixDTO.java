@@ -1,4 +1,4 @@
-package com.itu.gest_emp.statistique.model;
+package com.itu.gest_emp.modules.statistique.model;
 
 /**
  * DTO pour la matrice compétences par poste

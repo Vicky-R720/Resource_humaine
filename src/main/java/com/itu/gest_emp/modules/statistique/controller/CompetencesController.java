@@ -1,15 +1,17 @@
-package com.itu.gest_emp.statistique.controller;
+package com.itu.gest_emp.modules.statistique.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import com.itu.gest_emp.statistique.repository.CompetencesRepository;
-import com.itu.gest_emp.statistique.model.CompetenceMatrixDTO;
+
+import com.itu.gest_emp.modules.statistique.model.CompetenceMatrixDTO;
+import com.itu.gest_emp.modules.statistique.model.FormationSuggestionDTO;
+import com.itu.gest_emp.modules.statistique.repository.CompetencesRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
 import java.math.BigDecimal;
-import com.itu.gest_emp.statistique.model.FormationSuggestionDTO;
 
 @Controller
 @RequestMapping("/rh/competences")
