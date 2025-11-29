@@ -5,11 +5,18 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.itu.gest_emp.model.AcademicalQualification;
 import com.itu.gest_emp.model.Appliance;
 import com.itu.gest_emp.model.Offer;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "person")
 public class Person {
     
@@ -32,16 +39,8 @@ public class Person {
     @Column(name = "contact", length = 100)
     private String contact;
 
-    @Column(name = "mdp", length = 300)
-    private String mdp;
 
-    public String getMdp() {
-        return mdp;
-    }
-
-    public void setMdp(String mdp) {
-        this.mdp = mdp;
-    }
+    
     @Column(name = "pdp", length = 300)
     private String pdp;
     
@@ -52,78 +51,12 @@ public class Person {
     public void setPdp(String pdp) {
         this.pdp = pdp;
     }
+    
+    @JsonIgnore
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Appliance> appliances;
     
-    // Constructeurs
-    public Person() {}
-    
-    public Person(String nom, String prenom, String adresse, LocalDate naissance, String contact,String mdp,String pdp) {
-        this.nom = nom;
-        this.prenom = prenom;
-        this.adresse = adresse;
-        this.naissance = naissance;
-        this.contact = contact;
-        this.mdp=mdp;
-        this.pdp=pdp;
-    }
-    
-    // Getters et Setters
-    public Long getId() { 
-        return id; 
-    }
-    
-    public void setId(Long id) { 
-        this.id = id; 
-    }
-    
-    public String getNom() { 
-        return nom; 
-    }
-    
-    public void setNom(String nom) { 
-        this.nom = nom; 
-    }
-    
-    public String getPrenom() { 
-        return prenom; 
-    }
-    
-    public void setPrenom(String prenom) { 
-        this.prenom = prenom; 
-    }
-    
-    public String getAdresse() { 
-        return adresse; 
-    }
-    
-    public void setAdresse(String adresse) { 
-        this.adresse = adresse; 
-    }
-    
-    public LocalDate getNaissance() { 
-        return naissance; 
-    }
-    
-    public void setNaissance(LocalDate naissance) { 
-        this.naissance = naissance; 
-    }
-    
-    public String getContact() { 
-        return contact; 
-    }
-    
-    public void setContact(String contact) { 
-        this.contact = contact; 
-    }
-    
-    public List<Appliance> getAppliances() { 
-        return appliances; 
-    }
-    
-    public void setAppliances(List<Appliance> appliances) { 
-        this.appliances = appliances; 
-    }
+   
     
     // Méthode utilitaire pour calculer l'âge
     public int getAge() {
@@ -202,7 +135,7 @@ public class Person {
                 sb.append("  Poste: ").append(offer.getPost() != null ? offer.getPost().getName() : "Non spécifié").append("\n");
                 sb.append("  Entreprise: ").append(offer.getCompanyName()).append("\n");
                 sb.append("  Lieu: ").append(offer.getLocation()).append("\n");
-                sb.append("  Type de contrat: ").append(offer.getContractType() != null ? offer.getContractType().getName() : "Non spécifié").append("\n");
+                sb.append("  Type de contrat: ").append(offer.getContractType() != null ? offer.getContractType().getCode() : "Non spécifié").append("\n");
                 sb.append("  Expérience requise: ").append(offer.getExperienceLevel() != null ? offer.getExperienceLevel() : "Non spécifiée").append("\n");
                 sb.append("  Diplôme requis: ").append(offer.getDiploma() != null ? offer.getDiploma() : "Non spécifié").append("\n");
                 sb.append("  Places disponibles: ").append(offer.getAvailablePlaces()).append("\n");
@@ -604,6 +537,10 @@ public double CalculMatchingCV() {
     System.out.println("=====================\n");
     
     return (result / 17.0) * 100;
+}
+
+public Person(String nom2, String prenom2, String adresse2, LocalDate dateNaissance, String contact2, String pdpPath) {
+    //TODO Auto-generated constructor stub
 }
 }
 

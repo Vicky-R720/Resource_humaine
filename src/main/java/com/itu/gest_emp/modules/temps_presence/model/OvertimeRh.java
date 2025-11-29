@@ -9,7 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.itu.gest_emp.modules.personnel.model.PersonnelRh;
-import com.itu.gest_emp.modules.shared.model.Person;
+import com.itu.gest_emp.modules.shared.model.Utilisateur;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -38,11 +38,9 @@ public class OvertimeRh {
     @Column(name = "nombre_heures", nullable = false, precision = 5, scale = 2)
     private BigDecimal nombreHeures;
 
-    @Column(name = "type_hs", length = 50)
-    private String typeHs; // jour_normal, dimanche, jours_ferie, nuit
-
-    @Column(name = "taux_majoration", precision = 5, scale = 2)
-    private BigDecimal tauxMajoration = BigDecimal.ONE;
+    @ManyToOne
+    @JoinColumn(name = "type_hs_id")
+    private TypeHs typeHs;
 
     @Column(name = "montant_hs", precision = 15, scale = 2)
     private BigDecimal montantHs;
@@ -52,7 +50,7 @@ public class OvertimeRh {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "validated_by")
-    private Person validatedBy;
+    private Utilisateur validatedBy;
 
     @Column(name = "validation_date")
     private LocalDateTime validationDate;
@@ -74,30 +72,12 @@ public class OvertimeRh {
         calculerMontantHs();
     }
 
+    /**
+     * Calcule le montant des heures supplémentaires en utilisant
+     * le salaire horaire de base et le taux de majoration du type d'HS
+     */
     public void calculerMontantHs() {
-        if (salaireHoraireBase != null && nombreHeures != null && tauxMajoration != null) {
-            BigDecimal salaireMajoré = salaireHoraireBase.multiply(tauxMajoration);
-            this.montantHs = salaireMajoré.multiply(nombreHeures);
-        }
+        
     }
 
-    public void setTauxMajorationFromType() {
-        switch (typeHs) {
-            case "jour_normal":
-                this.tauxMajoration = new BigDecimal("1.3");
-                break;
-            case "dimanche":
-                this.tauxMajoration = new BigDecimal("1.5");
-                break;
-            case "jours_ferie":
-                this.tauxMajoration = new BigDecimal("2.0");
-                break;
-            case "nuit":
-                this.tauxMajoration = new BigDecimal("1.5");
-                break;
-            default:
-                this.tauxMajoration = BigDecimal.ONE;
-        }
-        calculerMontantHs();
-    }
 }

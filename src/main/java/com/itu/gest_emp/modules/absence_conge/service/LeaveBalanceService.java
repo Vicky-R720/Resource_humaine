@@ -33,18 +33,22 @@ public class LeaveBalanceService {
         // Report des soldes non utilisés, etc.
     }
 
-    /**
-     * Met à jour le solde après validation d'une demande
-     */
-    @Transactional
-    public void updateBalanceAfterApproval(LeaveRequest leaveRequest) {
+    public LeaveBalance findCurrentBalance(LeaveRequest leaveRequest) {
         LeaveBalance balance = leaveBalanceRepository
                 .findByPersonnel_IdAndLeaveTypeIdAndAnnee(
                         leaveRequest.getPersonnel().getId(),
                         leaveRequest.getLeaveType().getId(),
                         leaveRequest.getDateDebut().getYear())
                 .orElseThrow(() -> new RuntimeException("Solde non trouvé"));
+        return balance;
+    }
 
+    /**
+     * Met à jour le solde après validation d'une demande
+     */
+    @Transactional
+    public void updateBalanceAfterApproval(LeaveRequest leaveRequest) {
+        LeaveBalance balance = findCurrentBalance(leaveRequest);
         balance.setSoldePris(balance.getSoldePris().add(leaveRequest.getNombreJours()));
         // balance.setSoldeRestant(balance.getSoldeRestant().subtract(leaveRequest.getNombreJours()));
 
@@ -56,13 +60,7 @@ public class LeaveBalanceService {
      */
     @Transactional
     public void restoreBalanceAfterCancellation(LeaveRequest leaveRequest) {
-        LeaveBalance balance = leaveBalanceRepository
-                .findByPersonnel_IdAndLeaveTypeIdAndAnnee(
-                        leaveRequest.getPersonnel().getId(),
-                        leaveRequest.getLeaveType().getId(),
-                        leaveRequest.getDateDebut().getYear())
-                .orElseThrow(() -> new RuntimeException("Solde non trouvé"));
-
+        LeaveBalance balance = findCurrentBalance(leaveRequest);
         balance.setSoldePris(balance.getSoldePris().subtract(leaveRequest.getNombreJours()));
         balance.setSoldeRestant(balance.getSoldeRestant().add(leaveRequest.getNombreJours()));
 

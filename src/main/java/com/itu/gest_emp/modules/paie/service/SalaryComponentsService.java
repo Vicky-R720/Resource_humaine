@@ -45,11 +45,13 @@ public class SalaryComponentsService {
         return salaryComponentsRhRepository.findByPersonnel_Id(personnelId);
     }
 
-    public BigDecimal calculateTotalPrimes(Long personnelId, Integer mois, Integer annee) {
+    public List<SalaryComponentsRh> getActiveComponentsByPersonnelAndDate(Long personnelId, Integer mois,
+            Integer annee) {
         LocalDate referenceDate = LocalDate.of(annee, mois, 1);
-        List<SalaryComponentsRh> activeComponents = salaryComponentsRhRepository
-                .findActiveComponentsByPersonnelAndDate(personnelId, referenceDate);
-        System.out.println(activeComponents.size());
+        return salaryComponentsRhRepository.findActiveComponentsByPersonnelAndDate(personnelId, referenceDate);
+    }
+
+    public BigDecimal calculateTotalPrimes(List<SalaryComponentsRh> activeComponents) {
         return activeComponents.stream()
                 .map(SalaryComponentsRh::getMontant)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

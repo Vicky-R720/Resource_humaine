@@ -33,5 +33,8 @@ public interface OvertimeRepository extends JpaRepository<OvertimeRh, Long> {
 
     List<OvertimeRh> findByPersonnel_IdAndDateHsBetween(Long personnelId, LocalDate startDate, LocalDate endDate);
 
+    List<OvertimeRh> findByPersonnel_IdAndDateHsBetweenAndStatut(Long id, LocalDate start, LocalDate end,
+            String string);
+
     // List<Object[]> findHeuresMensuellesParPersonnel(LocalDate startDate, LocalDate endDate);
 }

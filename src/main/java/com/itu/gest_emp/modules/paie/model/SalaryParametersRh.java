@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.itu.gest_emp.modules.shared.model.SecteurActiviteEnum;
+
 @Entity
 @Table(name = "salary_parameters_rh")
 @Data
@@ -44,12 +46,6 @@ public class SalaryParametersRh {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @Column(name = "seuil_min", precision = 15, scale = 2)
-    private BigDecimal seuilMin = BigDecimal.ZERO;
-
-    @Column(name = "seuil_max", precision = 15, scale = 2)
-    private BigDecimal seuilMax; // peut être NULL
 
     // Getters and Setters
 }

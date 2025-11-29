@@ -45,7 +45,7 @@ public class SalaryComponentsController {
                 .filter(c -> c.getId().equals(id))
                 .findFirst()
                 .orElse(new SalaryComponentsRh());
-                System.out.println(composante.getTypeComposante());
+        System.out.println(composante.getTypeComposante());
 
         List<String> types = salaryComponentsService.getTypesComposantes();
 

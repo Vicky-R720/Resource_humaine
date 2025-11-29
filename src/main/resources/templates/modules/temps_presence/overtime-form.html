@@ -31,11 +31,10 @@
         </div>
         <div>
             <label>Type :</label>
-            <select th:field="*{typeHs}">
-                <option value="jour_normal">Jour normal</option>
-                <option value="dimanche">Dimanche</option>
-                <option value="jours_ferie">Jour férié</option>
-                <option value="nuit">Nuit</option>
+            <select th:field="*{typeHsId}">
+                <option value="">-- Choisir un type d'heure sup --</option>
+                <option th:each="t : ${typesHs}" th:value="${t.id}" th:text="${t.description}">
+                </option>
             </select>
         </div>
         <div>

@@ -6,18 +6,23 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.itu.gest_emp.modules.absence_conge.dto.LeaveRequestDTO;
+import com.itu.gest_emp.modules.absence_conge.dto.RetourCongeRequest;
 import com.itu.gest_emp.modules.absence_conge.model.LeaveRequest;
+import com.itu.gest_emp.modules.absence_conge.repository.LeaveRequestRepository;
 import com.itu.gest_emp.modules.absence_conge.repository.LeaveTypeRepository;
+// import com.itu.gest_emp.modules.absence_conge.service.AbsencePVService;
+// import com.itu.gest_emp.modules.absence_conge.service.IndemniteRuptureService;
 import com.itu.gest_emp.modules.absence_conge.service.LeaveCalculationService;
 import com.itu.gest_emp.modules.absence_conge.service.LeaveWorkflowService;
 import com.itu.gest_emp.modules.personnel.service.PersonnelRhService;
+
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/api/leave-requests")
@@ -34,6 +39,17 @@ public class LeaveRequestController {
 
     @Autowired
     private LeaveTypeRepository leaveTypeRepository;
+
+
+
+    // @Autowired
+    // private AbsencePVService absencePVService;
+
+    // @Autowired
+    // private IndemniteRuptureService indemniteRuptureService;
+
+    @Autowired
+    private LeaveRequestRepository leaveRequestRepository;
 
     private final String UPLOAD_DIR = "uploads/justificatifs/";
 
@@ -122,54 +138,52 @@ public class LeaveRequestController {
         return filePath.toString();
     }
 
-    // DTO pour la soumission des demandes
-    public static class LeaveRequestDTO {
-        private Long personnelId;
-        private Long leaveTypeId;
-        private LocalDate dateDebut;
-        private LocalDate dateFin;
-        private String motif;
+    // @PostMapping("/declarer-absence")
+    // public ResponseEntity<?> declarerAbsenceNonAutorisee(@RequestBody
+    // DeclarerAbsenceRequest request) {
+    // try {
+    // absencePVService.traiterAbsenceNonAutorisee(
+    // request.getPersonnelId(),
+    // request.getDateAbsence(),
+    // request.getMotif());
+    // return ResponseEntity.ok().build();
+    // } catch (Exception e) {
+    // return ResponseEntity.badRequest().body(e.getMessage());
+    // }
+    // }
 
-        public Long getPersonnelId() {
-            return personnelId;
+    // /**
+    // * Calculer l'indemnité de congés pour rupture
+    // */
+    // @GetMapping("/indemnite-rupture/{personnelId}")
+    // public ResponseEntity<BigDecimal> calculerIndemniteRupture(
+    // @PathVariable Long personnelId,
+    // @RequestParam String typeRupture) {
+    // try {
+    // BigDecimal indemnite =
+    // indemniteRuptureService.calculerIndemniteCongeRupture(personnelId,
+    // typeRupture);
+    // return ResponseEntity.ok(indemnite);
+    // } catch (Exception e) {
+    // return ResponseEntity.badRequest().build();
+    // }
+    // }
+
+    @PostMapping("/{requestId}/retour")
+    public ResponseEntity<?> enregistrerRetour(
+            @PathVariable Long requestId,
+            @RequestBody RetourCongeRequest request) {
+        try {
+            LeaveRequest leaveRequest = leaveRequestRepository.findById(requestId)
+                    .orElseThrow(() -> new RuntimeException("Demande non trouvée"));
+
+            // Enregistrer le retour effectif
+            leaveWorkflowService.enregistrerRetour(leaveRequest,request.getDateRetour(), request.getJustification());
+            return ResponseEntity.ok().build();
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        public void setPersonnelId(Long personnelId) {
-            this.personnelId = personnelId;
-        }
-
-        public Long getLeaveTypeId() {
-            return leaveTypeId;
-        }
-
-        public void setLeaveTypeId(Long leaveTypeId) {
-            this.leaveTypeId = leaveTypeId;
-        }
-
-        public LocalDate getDateDebut() {
-            return dateDebut;
-        }
-
-        public void setDateDebut(LocalDate dateDebut) {
-            this.dateDebut = dateDebut;
-        }
-
-        public LocalDate getDateFin() {
-            return dateFin;
-        }
-
-        public void setDateFin(LocalDate dateFin) {
-            this.dateFin = dateFin;
-        }
-
-        public String getMotif() {
-            return motif;
-        }
-
-        public void setMotif(String motif) {
-            this.motif = motif;
-        }
-
-        // Getters et setters...
     }
+
 }

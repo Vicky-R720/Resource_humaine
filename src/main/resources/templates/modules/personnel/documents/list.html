@@ -1,0 +1,40 @@
+<div class="container mt-4">
+    <h2>Documents RH — [[${personnel.person.getFullName}]]</h2>
+
+    <a th:href="@{/personnel/{id}/documents/upload(id=${personnel.id})}" class="btn btn-primary mb-3">
+        + Ajouter un document
+    </a>
+
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Nom</th>
+                <th>Date expiration</th>
+                <th>Vérifié</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr th:each="doc : ${documents}">
+                <td th:text="${doc.typeDocument}"></td>
+                <td>
+                    <a th:href="@{'/api/documents/' + ${doc.id} + '/view'}" th:text="${doc.nomDocument}">Document</a>
+                </td>
+                <td th:text="${doc.dateExpiration}"></td>
+                <td>
+                    <span th:text="${doc.isVerified ? 'Oui' : 'Non'}"></span>
+                </td>
+                <td>
+                    <a th:href="@{'/personnel/' + ${personnel.id} + '/documents/' + ${doc.id} + '/verify'}"
+                        class="btn btn-success btn-sm">Vérifier</a>
+
+                    <a th:href="@{'/personnel/' + ${personnel.id} + '/documents/' + ${doc.id} + '/delete'}"
+                        class="btn btn-danger btn-sm">Supprimer</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

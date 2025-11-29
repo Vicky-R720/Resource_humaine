@@ -6,8 +6,10 @@ import com.itu.gest_emp.modules.absence_conge.repository.LeaveBalanceRepository;
 import com.itu.gest_emp.modules.absence_conge.repository.LeaveRequestRepository;
 import com.itu.gest_emp.modules.shared.model.NotificationRh;
 import com.itu.gest_emp.modules.shared.model.Person;
+import com.itu.gest_emp.modules.shared.model.Utilisateur;
 import com.itu.gest_emp.modules.shared.service.NotificationRhService;
 import com.itu.gest_emp.modules.shared.service.PersonService;
+import com.itu.gest_emp.modules.shared.service.UtilisateurService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,6 +33,9 @@ public class LeaveAlertService {
     @Autowired
     private NotificationRhService notificationService;
 
+    @Autowired
+    private UtilisateurService utilisateurService;
+
     /**
      * Alerte pour congés non validés après 48h
      */
@@ -51,7 +56,9 @@ public class LeaveAlertService {
                         request.getCreatedAt()));
                 notification.setType("leave_reminder");
                 Person superior = personService.getPersonById(13L).get();
-                notification.setRecipient(superior);
+
+                Utilisateur utilisateurSup = utilisateurService.findByPersonId(superior.getId());
+                notification.setRecipient(utilisateurSup); // ID du manager
 
                 notificationService.createNotification(notification);
             }
@@ -75,7 +82,8 @@ public class LeaveAlertService {
                         balance.getLeaveType().getName(),
                         balance.getSoldeRestant()));
                 notification.setType("negative_balance");
-                notification.setRecipient(balance.getPersonnel().getPerson());
+                notification
+                        .setRecipient(utilisateurService.findByPersonId(balance.getPersonnel().getPerson().getId()));
                 notificationService.createNotification(notification);
             }
         }

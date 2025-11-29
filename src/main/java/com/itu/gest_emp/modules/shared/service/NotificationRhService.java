@@ -2,21 +2,22 @@ package com.itu.gest_emp.modules.shared.service;
 
 import com.itu.gest_emp.modules.shared.model.NotificationRh;
 import com.itu.gest_emp.modules.shared.repository.NotificationRhRepository;
-import com.itu.gest_emp.modules.shared.model.Person;
+import com.itu.gest_emp.modules.shared.model.Utilisateur;
 import com.itu.gest_emp.modules.shared.repository.PersonRepository;
-import com.itu.gest_emp.modules.temps_presence.model.OvertimeRh;
+
+
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 public class NotificationRhService {
 
     @Autowired
@@ -29,22 +30,32 @@ public class NotificationRhService {
         return notificationRhRepository.save(notification);
     }
 
-    public NotificationRh createNotification(Long personId, String title, String message, String type) {
-        Person person = personRepository.findById(personId)
-                .orElseThrow(() -> new RuntimeException("Personne non trouvée avec l'ID: " + personId));
+    @Transactional
+    public void createNotification(
+            Utilisateur recipient,
+            Utilisateur sender,
+            String title,
+            String message,
+            String type,
+            String relatedEntityType,
+            Long relatedEntityId) {
 
-        NotificationRh notification = new NotificationRh(person, title, message, type);
-        return notificationRhRepository.save(notification);
-    }
+        try {
+            NotificationRh notification = new NotificationRh(
+                    recipient,
+                    sender,
+                    title,
+                    message,
+                    type,
+                    relatedEntityType,
+                    relatedEntityId);
 
-    public NotificationRh createNotification(Long personId, String title, String message, String type,
-            String relatedEntityType, Long relatedEntityId) {
-        Person person = personRepository.findById(personId)
-                .orElseThrow(() -> new RuntimeException("Personne non trouvée avec l'ID: " + personId));
+            notificationRhRepository.save(notification);
+            log.info("Notification '{}' de type '{}' créée pour {}", title, type, recipient.getId());
 
-        NotificationRh notification = new NotificationRh(person, title, message, type, relatedEntityType,
-                relatedEntityId);
-        return notificationRhRepository.save(notification);
+        } catch (Exception e) {
+            log.error("Erreur création notification '{}' pour {}: {}", title, recipient.getId(), e.getMessage());
+        }
     }
 
     public List<NotificationRh> getUserNotifications(Long personId) {
@@ -82,42 +93,5 @@ public class NotificationRhService {
         int deletedCount = notificationRhRepository.deleteExpiredNotifications(LocalDateTime.now());
         System.out.println("Notifications expirées supprimées: " + deletedCount);
     }
-
-    // Méthode utilitaire pour les congés
-    public void sendLeaveRequestNotification(Long managerPersonId, String employeeName,
-            LocalDate startDate, LocalDate endDate, Long leaveRequestId) {
-        String title = "Nouvelle demande de congé";
-        String message = String.format(
-                "L'employé %s a soumis une demande de congé du %s au %s",
-                employeeName, startDate, endDate);
-
-        createNotification(managerPersonId, title, message, "leave_request", "LeaveRequest", leaveRequestId);
-    }
-
-    public void sendLeaveApprovalNotification(Long employeePersonId, String comment, Long leaveRequestId) {
-        String title = "Demande de congé approuvée";
-        String message = "Votre demande de congé a été approuvée" +
-                (comment != null ? ". Commentaire: " + comment : "");
-
-        createNotification(employeePersonId, title, message, "leave_approval", "LeaveRequest", leaveRequestId);
-    }
-
-    public void sendLeaveRejectionNotification(Long employeePersonId, String comment, Long leaveRequestId) {
-        String title = "Demande de congé refusée";
-        String message = "Votre demande de congé a été refusée" +
-                (comment != null ? ". Motif: " + comment : "");
-
-        createNotification(employeePersonId, title, message, "leave_rejection", "LeaveRequest", leaveRequestId);
-    }
-
-    public void sendBalanceAlertNotification(Long personId, String leaveTypeName, BigDecimal remainingBalance) {
-        String title = "Alerte solde de congé";
-        String message = String.format(
-                "Votre solde de %s est faible: %s jours restants",
-                leaveTypeName, remainingBalance);
-
-        createNotification(personId, title, message, "balance_alert");
-    }
-
 
 }

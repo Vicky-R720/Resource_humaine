@@ -11,6 +11,9 @@ public class OvertimeCreateDto {
     private Long attendanceId;
     private LocalDate dateHs;
     private BigDecimal nombreHeures;
-    private String typeHs;
+
+    // On passe maintenant l'ID du type d'HS
+    private Long typeHsId;
+
     private BigDecimal salaireHoraireBase;
 }

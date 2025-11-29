@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.itu.gest_emp.modules.personnel.model.ContractType;
 import com.itu.gest_emp.modules.shared.model.Post;
 
 @Entity

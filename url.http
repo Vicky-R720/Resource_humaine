@@ -1,0 +1,2 @@
+curl -X POST "http://localhost:8081/api/personnel/contracts/rupture/1/valider?validateurId=10&accepte=true&commentaire=OK" \
+     -H "Content-Type: application/json"

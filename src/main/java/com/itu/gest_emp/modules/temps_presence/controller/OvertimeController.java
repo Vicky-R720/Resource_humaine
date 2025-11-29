@@ -42,6 +42,8 @@ public class OvertimeController {
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("overtime", new OvertimeCreateDto());
+        model.addAttribute("typesHs", overtimeService.getTypeHsService().findAll());
+
         return "modules/temps_presence/overtime-form";
     }
 

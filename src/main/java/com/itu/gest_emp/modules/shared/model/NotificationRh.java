@@ -1,9 +1,7 @@
 package com.itu.gest_emp.modules.shared.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,9 +18,15 @@ public class NotificationRh {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Destinataire de la notification
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_id", nullable = false)
-    private Person recipient;
+    private Utilisateur recipient;
+
+    // Expéditeur / source de la notification
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id")
+    private Utilisateur sender;
 
     @Column(name = "title", nullable = false, length = 255)
     private String title;
@@ -31,7 +35,7 @@ public class NotificationRh {
     private String message;
 
     @Column(name = "type", length = 50)
-    private String type; // leave_request, leave_approval, leave_rejection, alert, etc.
+    private String type; // ex: leave_request, leave_approval, alert, etc.
 
     @Column(name = "is_read", nullable = false)
     private Boolean isRead = false;
@@ -51,6 +55,7 @@ public class NotificationRh {
     @Column(name = "expires_at")
     private LocalDateTime expiresAt;
 
+    // Lifecycle callbacks
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -62,32 +67,28 @@ public class NotificationRh {
         updatedAt = LocalDateTime.now();
     }
 
-    // Constructeur pratique
-    public NotificationRh(Person recipient, String title, String message, String type) {
-        this.recipient = recipient;
-        this.title = title;
-        this.message = message;
-        this.type = type;
-    }
-
-    public NotificationRh(Person recipient, String title, String message, String type,
-            String relatedEntityType, Long relatedEntityId) {
-        this.recipient = recipient;
-        this.title = title;
-        this.message = message;
-        this.type = type;
-        this.relatedEntityType = relatedEntityType;
-        this.relatedEntityId = relatedEntityId;
-    }
-
-    // Méthode pour marquer comme lu
+    // Marquer comme lu
     public void markAsRead() {
         this.isRead = true;
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Méthode pour vérifier si la notification est expirée
+    // Vérifier si expirée
     public boolean isExpired() {
         return expiresAt != null && LocalDateTime.now().isAfter(expiresAt);
+    }
+
+    // Constructeur pratique
+    public NotificationRh(Utilisateur recipient, Utilisateur sender, String title, String message, String type, String relatedEntityType, Long relatedEntityId) {
+        this.recipient = recipient;
+        this.sender = sender;
+        this.title = title;
+        this.message = message;
+        this.type = type;
+        this.relatedEntityType = relatedEntityType;
+        this.relatedEntityId = relatedEntityId;
+        this.isRead = false;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 }

@@ -2,6 +2,7 @@
 package com.itu.gest_emp.modules.personnel.service;
 
 import com.itu.gest_emp.modules.personnel.model.ContractsRh;
+import com.itu.gest_emp.modules.personnel.repository.ContractTypeRepository;
 import com.itu.gest_emp.modules.personnel.repository.ContractsRhRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +21,7 @@ import java.util.Optional;
 public class ContractsRhService {
 
     private final ContractsRhRepository contractsRhRepository;
+    private final ContractTypeRepository contractTypeRepository;
 
     public List<ContractsRh> findAll() {
         return contractsRhRepository.findAll();
@@ -40,17 +43,20 @@ public class ContractsRhService {
         return contractsRhRepository.findByDateFin(dateLimit);
     }
 
-    public BigDecimal getSalaireBase(Long personnelId, Integer mois, Integer annee) {
-        YearMonth ym = YearMonth.of(annee, mois);
-        LocalDate date = ym.atEndOfMonth();
-
+    public ContractsRh getContrat(Long personnelId, LocalDate date) {
         return contractsRhRepository
-                .findActiveContract(personnelId, date, "actif")
+                .findContract(personnelId, date)
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException(
-                        "Aucun contrat actif trouvé pour le personnel " + personnelId + " à la date " + date))
-                .getSalaireBase();
+                        "Aucun contrat  trouvé pour le personnel " + personnelId + " à la date " + date));
+    }
+
+    public BigDecimal getSalaireBase(Long personnelId, Integer mois, Integer annee) {
+        YearMonth ym = YearMonth.of(annee, mois);
+        LocalDate date = ym.atEndOfMonth();
+        ContractsRh contrat = getContrat(personnelId, date);
+        return contrat.getSalaireBase();
     }
 
     public ContractsRh create(ContractsRh contract) {
@@ -69,9 +75,8 @@ public class ContractsRhService {
     public ContractsRh update(Long id, ContractsRh contract) {
         ContractsRh existing = contractsRhRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contrat non trouvé avec l'ID: " + id));
-
-        if (contract.getTypeContrat() != null)
-            existing.setTypeContrat(contract.getTypeContrat());
+        if (contract.getContractType() != null)
+            existing.setContractType(contract.getContractType());
         if (contract.getDateDebut() != null)
             existing.setDateDebut(contract.getDateDebut());
         if (contract.getDateFin() != null)
@@ -101,6 +106,8 @@ public class ContractsRhService {
                 .orElseThrow(() -> new RuntimeException("Contrat non trouvé avec l'ID: " + id));
 
         contract.setIsEssaiValide(valide);
+        contract.setDateValidationEssai(LocalDate.now()); // date de validation
+
         if (!valide) {
             contract.setStatut("terminé");
             contract.setMotifFin("Période d'essai non validée");
@@ -109,17 +116,55 @@ public class ContractsRhService {
         return contractsRhRepository.save(contract);
     }
 
-    public ContractsRh renouvelerContrat(Long ancienContratId, ContractsRh nouveauContrat) {
+    public ContractsRh prolongerOuTransformerEnCDI(Long ancienContratId, LocalDate nouvelleDateFin,
+            BigDecimal salaire) {
         ContractsRh ancienContrat = contractsRhRepository.findById(ancienContratId)
                 .orElseThrow(() -> new RuntimeException("Contrat non trouvé avec l'ID: " + ancienContratId));
 
-        // Terminer l'ancien contrat
-        ancienContrat.setStatut("terminé");
-        ancienContrat.setMotifFin("Renouvellement");
-        contractsRhRepository.save(ancienContrat);
+        if (!"CDD".equalsIgnoreCase(ancienContrat.getContractType().getCode())) {
+            throw new IllegalStateException("Seuls les CDD peuvent être prolongés");
+        }
 
-        // Créer le nouveau contrat
+        List<ContractsRh> cddsExistants = contractsRhRepository
+                .findByPersonnelAndContractType_Code(ancienContrat.getPersonnel(), "CDD");
+
+        long totalMois = cddsExistants.stream()
+                .mapToLong(c -> ChronoUnit.MONTHS.between(c.getDateDebut(), c.getDateFin()))
+                .sum();
+
+        long dureeProposee = ChronoUnit.MONTHS.between(ancienContrat.getDateFin().plusDays(1), nouvelleDateFin);
+        totalMois += dureeProposee;
+
+        ContractsRh nouveauContrat = new ContractsRh();
         nouveauContrat.setPersonnel(ancienContrat.getPersonnel());
-        return create(nouveauContrat);
+        nouveauContrat.setSalaireBase(salaire);
+        nouveauContrat.setDateDebut(ancienContrat.getDateFin().plusDays(1));
+
+        // Vérifier la limite 24 mois
+        if (totalMois > 24) {
+            // Transforme en CDI
+            nouveauContrat.setContractType(contractTypeRepository.findByCode("CDI").orElseThrow());
+            nouveauContrat.setDateFin(null);
+            nouveauContrat.setStatut("actif");
+
+            ancienContrat.setStatut("termine");
+            ancienContrat.setMotifFin("Passage en CDI");
+            contractsRhRepository.save(ancienContrat);
+        } else {
+            // Nouveau CDD
+            nouveauContrat.setContractType(ancienContrat.getContractType());
+            nouveauContrat.setDateFin(nouvelleDateFin);
+            nouveauContrat.setStatut("actif");
+
+            ancienContrat.setStatut("termine");
+            ancienContrat.setMotifFin("Renouvellement");
+            contractsRhRepository.save(ancienContrat);
+        }
+
+        return contractsRhRepository.save(nouveauContrat);
+    }
+
+    public List<ContractsRh> findByPersonnelIdOrderByDateDebutAsc(Long id) {
+        return contractsRhRepository.findByPersonnelIdOrderByDateDebutAsc(id);
     }
 }

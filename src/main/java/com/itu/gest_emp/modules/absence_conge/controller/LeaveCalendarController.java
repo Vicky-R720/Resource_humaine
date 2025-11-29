@@ -5,11 +5,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import com.itu.gest_emp.modules.absence_conge.dto.CalendarEventDTO;
 import com.itu.gest_emp.modules.absence_conge.model.LeaveRequest;
+import com.itu.gest_emp.modules.absence_conge.model.LeaveRequest.LeaveStatus;
 import com.itu.gest_emp.modules.absence_conge.repository.LeaveRequestRepository;
+import com.itu.gest_emp.modules.shared.model.Service;
+import com.itu.gest_emp.modules.shared.repository.ServiceRepository;
 
-import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -19,17 +24,38 @@ public class LeaveCalendarController {
     @Autowired
     private LeaveRequestRepository leaveRequestRepository;
 
+    @Autowired
+    private ServiceRepository serviceRepo;
+
     /**
      * Calendrier visuel des congés par équipe/service
      */
     @GetMapping("/service/{serviceId}")
     public ResponseEntity<?> getServiceCalendar(@PathVariable Long serviceId) {
-        List<LeaveRequest> approvedLeaves = leaveRequestRepository.findByValidatedBy_IdAndStatut(serviceId, "approuve");
-        List<CalendarEventDTO> events = approvedLeaves.stream()
-                .map(this::convertToCalendarEvent)
-                .collect(Collectors.toList());
+        try {
+            if (serviceId == null || serviceId <= 0) {
+                return ResponseEntity.badRequest().body(Map.of("error", "ID de service invalide"));
+            }
 
-        return ResponseEntity.ok(events);
+            Optional<Service> serviceOpt = serviceRepo.findById(serviceId);
+            if (serviceOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Récupération des congés approuvés pour ce service
+            List<LeaveRequest> approvedLeaves = leaveRequestRepository
+                    .findByStatutAndPersonnel_Post_Equipe_Service_Id(LeaveStatus.APPROUVE, serviceId);
+
+            List<CalendarEventDTO> events = approvedLeaves.stream()
+                    .map(this::convertToCalendarEvent)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(events);
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    Map.of("error", "Erreur interne du serveur"));
+        }
     }
 
     /**
@@ -37,13 +63,32 @@ public class LeaveCalendarController {
      */
     @GetMapping("/export/ical/{serviceId}")
     public ResponseEntity<?> exportICal(@PathVariable Long serviceId) {
-        List<LeaveRequest> approvedLeaves = leaveRequestRepository.findByValidatedBy_IdAndStatut(serviceId, "approuve");
-        String icalContent = generateICalContent(approvedLeaves);
+        try {
+            if (serviceId == null || serviceId <= 0) {
+                return ResponseEntity.badRequest().build();
+            }
 
-        return ResponseEntity.ok()
-                .header("Content-Type", "text/calendar")
-                .header("Content-Disposition", "attachment; filename=calendrier-conges.ics")
-                .body(icalContent);
+            Optional<Service> serviceOpt = serviceRepo.findById(serviceId);
+            if (serviceOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Récupération des congés approuvés pour ce service
+            List<LeaveRequest> approvedLeaves = leaveRequestRepository
+                    .findByStatutAndPersonnel_Post_Equipe_Service_Id(LeaveStatus.APPROUVE, serviceId);
+
+            String icalContent = generateICalContent(approvedLeaves);
+
+            return ResponseEntity.ok()
+                    .header("Content-Type", "text/calendar; charset=utf-8")
+                    .header("Content-Disposition",
+                            "attachment; filename=\"calendrier-conges-service-" + serviceId + ".ics\"")
+                    .body(icalContent);
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    Map.of("error", "Erreur lors de la génération du fichier iCal"));
+        }
     }
 
     private CalendarEventDTO convertToCalendarEvent(LeaveRequest leaveRequest) {
@@ -76,64 +121,5 @@ public class LeaveCalendarController {
 
         ical.append("END:VCALENDAR\n");
         return ical.toString();
-    }
-
-    public static class CalendarEventDTO {
-        private Long id;
-        private String title;
-        private LocalDate start;
-        private LocalDate end;
-        private String color;
-        private String description;
-
-        public Long getId() {
-            return id;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
-        public LocalDate getStart() {
-            return start;
-        }
-
-        public void setStart(LocalDate start) {
-            this.start = start;
-        }
-
-        public LocalDate getEnd() {
-            return end;
-        }
-
-        public void setEnd(LocalDate end) {
-            this.end = end;
-        }
-
-        public String getColor() {
-            return color;
-        }
-
-        public void setColor(String color) {
-            this.color = color;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public void setDescription(String description) {
-            this.description = description;
-        }
-
-        // Getters et setters...
     }
 }

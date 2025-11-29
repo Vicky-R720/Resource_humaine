@@ -1,18 +1,13 @@
 package com.itu.gest_emp.modules.shared.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import com.itu.gest_emp.modules.personnel.model.CategoriePersonnel;
+import com.itu.gest_emp.modules.shared.model.Equipe;
 
 @Entity
 @Table(name = "post")
 public class Post {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,22 +21,34 @@ public class Post {
     @Column(name = "missions", columnDefinition = "TEXT")
     private String missions;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "service_id")
-    private Service service;
+    /* service relation removed as requested */
 
-    // Constructeurs
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categorie_id")
+    private CategoriePersonnel categorie;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "equipe_id")
+    private Equipe equipe;
+
     public Post() {
     }
 
-    public Post(String name, String description, String missions, Service service) {
+    public Post(String name, String description, String missions) {
         this.name = name;
         this.description = description;
         this.missions = missions;
-        this.service = service;
     }
 
-    // Getters et setters
+    public Post(String name, String description, String missions, CategoriePersonnel categorie, Equipe equipe) {
+        this.name = name;
+        this.description = description;
+        this.missions = missions;
+        this.categorie = categorie;
+        this.equipe = equipe;
+    }
+
     public Long getId() {
         return id;
     }
@@ -74,12 +81,22 @@ public class Post {
         this.missions = missions;
     }
 
-    public Service getService() {
-        return service;
+    // service getters/setters removed
+
+    public CategoriePersonnel getCategorie() {
+        return categorie;
     }
 
-    public void setService(Service service) {
-        this.service = service;
+    public void setCategorie(CategoriePersonnel categorie) {
+        this.categorie = categorie;
+    }
+
+    public Equipe getEquipe() {
+        return equipe;
+    }
+
+    public void setEquipe(Equipe equipe) {
+        this.equipe = equipe;
     }
 
     @Override
@@ -89,7 +106,8 @@ public class Post {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", missions='" + missions + '\'' +
-                ", service=" + (service != null ? service.getName() : "null") +
+                ", categorie=" + (categorie != null ? categorie.getNom() : "null") +
+                ", equipe=" + (equipe != null ? equipe.getNom() : "null") +
                 '}';
     }
 }

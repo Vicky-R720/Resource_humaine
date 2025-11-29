@@ -1,3 +1,4 @@
+<!-- personnel-detail.html -->
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 
@@ -155,7 +156,7 @@
 
 <body>
     <div class="container">
-        <button class="back-btn" onclick="history.back()">← Retour</button>
+        <button class="back-btn" onclick="window.location.href='/personnel'">← Retour</button>
 
         <div class="profile-card">
             <div class="profile-header">
@@ -169,6 +170,11 @@
                     <p>📅 Date d'embauche: <strong
                             th:text="${#temporals.format(personnel.dateEmbauche,'dd/MM/yyyy')}">01/01/2020</strong></p>
                     <p>🏷️ Statut: <span class="badge" th:text="${personnel.statut}">Actif</span></p>
+                    <p>⏱️ Ancienneté:
+                        <strong th:text="${anciennete.years} + ' an(s) ' + ${anciennete.months} + ' mois' + ${anciennete.days} + ' jour(s)'">
+                            0 an(s) 0 mois 0 jour(s)
+                        </strong>
+                    </p>
                 </div>
             </div>
 
@@ -280,7 +286,7 @@
                     <button>Acceder à la page de gestion complete?</button>
                 </form>
                 <div th:each="c : ${contrats}" class="contract-card">
-                    <h3 th:text="${c.typeContrat}">CDI</h3>
+                    <h3 th:text="${c.contractType.code}">CDI</h3>
                     <p
                         th:text="|Du ${c.dateDebut != null ? #temporals.format(c.dateDebut,'dd/MM/yyyy') : '-'} au ${c.dateFin != null ? #temporals.format(c.dateFin,'dd/MM/yyyy') : 'Indéterminé'}|">
                         Dates</p>

@@ -6,6 +6,7 @@ import com.itu.gest_emp.model.Diploma;
 import com.itu.gest_emp.model.Filiere;
 import com.itu.gest_emp.model.Offer;
 import com.itu.gest_emp.model.Sector;
+import com.itu.gest_emp.modules.personnel.service.ContractTypeService;
 import com.itu.gest_emp.modules.shared.model.Notification;
 import com.itu.gest_emp.modules.shared.model.Person;
 import com.itu.gest_emp.modules.shared.service.NotificationService;
@@ -23,7 +24,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 
 import com.itu.gest_emp.service.AcademicalQualificationServiceImpl;
-import com.itu.gest_emp.service.ContractTypeService;
 import com.itu.gest_emp.service.SectorService;
 import com.itu.gest_emp.service.DiplomaService;
 import com.itu.gest_emp.service.FiliereService;

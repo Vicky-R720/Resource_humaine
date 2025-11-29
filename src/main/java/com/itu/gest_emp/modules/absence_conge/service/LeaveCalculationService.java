@@ -2,10 +2,14 @@ package com.itu.gest_emp.modules.absence_conge.service;
 
 import org.springframework.stereotype.Service;
 
+import com.itu.gest_emp.modules.absence_conge.model.LeaveBalance;
+
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -111,4 +115,57 @@ public class LeaveCalculationService {
 
         return result;
     }
+
+    public Map<Integer, BigDecimal[]> simulateLeaveBalance(
+            BigDecimal initialSoldeInitial,
+            int yearsWorked,
+            Map<Integer, BigDecimal> soldeAcquisParAn,
+            Map<Integer, BigDecimal> joursPrisParAn) {
+
+        Map<Integer, BigDecimal[]> result = new HashMap<>();
+        Map<Integer, Boolean> test = new HashMap<>();
+
+        BigDecimal soldeInitial = initialSoldeInitial;
+        BigDecimal maxCumul = BigDecimal.valueOf(2.5 * 12 * 3); // 90 jours
+
+        // Initialiser la map de test
+        for (Integer yearKey : soldeAcquisParAn.keySet()) {
+            test.put(yearKey, false);
+        }
+
+        for (int year = 1; year <= yearsWorked; year++) {
+            BigDecimal soldeAcquis = soldeAcquisParAn.getOrDefault(year, BigDecimal.valueOf(12 * 2.5));
+
+            // Expiration des acquis après 3 ans
+            for (Integer yearKey : soldeAcquisParAn.keySet()) {
+                BigDecimal solde = soldeAcquisParAn.get(yearKey);
+                if (!test.get(yearKey) && year - yearKey >= 3) {
+                    soldeInitial = soldeInitial.subtract(solde);
+                    if (soldeInitial.compareTo(BigDecimal.ZERO) < 0)
+                        soldeInitial = BigDecimal.ZERO;
+                    test.put(yearKey, true);
+                }
+            }
+
+            // Appliquer le plafond cumulable
+            
+            
+
+            // Calcul solde restant
+            BigDecimal soldeRestant = soldeInitial.add(soldeAcquis)
+                    .subtract(joursPrisParAn.getOrDefault(year, BigDecimal.ZERO));
+            if (soldeRestant.compareTo(BigDecimal.ZERO) < 0)
+                soldeRestant = BigDecimal.ZERO;
+
+            // Enregistrer
+            result.put(year, new BigDecimal[] { soldeInitial, soldeAcquis,
+                    joursPrisParAn.getOrDefault(year, BigDecimal.ZERO), soldeRestant });
+
+            // Préparer l'année suivante
+            soldeInitial = soldeRestant;
+        }
+
+        return result;
+    }
+
 }

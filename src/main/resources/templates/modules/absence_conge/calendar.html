@@ -1,0 +1,44 @@
+<!-- calendar.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendrier des congés</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/leave.css}">
+</head>
+<body>
+    <h1>Calendrier des congés</h1>
+    <div>
+        <label for="serviceSelect">Sélectionnez un service :</label>
+        <select id="serviceSelect">
+            <option value="1">Service 1</option>
+            <option value="2">Service 2</option>
+        </select>
+    </div>
+
+    <div id="calendar"></div>
+
+    <!-- Correct FullCalendar CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script th:src="@{/js/leave.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Small delay to ensure FullCalendar is loaded
+            if (typeof FullCalendar !== 'undefined') {
+                initCalendar();
+            } else {
+                console.error('FullCalendar not loaded');
+                // Retry after a short delay
+                setTimeout(() => {
+                    if (typeof FullCalendar !== 'undefined') {
+                        initCalendar();
+                    } else {
+                        console.error('FullCalendar still not loaded');
+                    }
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

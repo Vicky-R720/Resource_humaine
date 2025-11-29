@@ -41,6 +41,9 @@ public class LeaveBalance {
     @Column(name = "solde_pris", precision = 5, scale = 2)
     private BigDecimal soldePris = BigDecimal.ZERO;
 
+    @Column(name = "solde_exceptionnel", precision = 5, scale = 2)
+    private BigDecimal soldeExceptionnel = BigDecimal.ZERO; // congés justifiés/non validés
+
     @Column(name = "solde_restant", precision = 5, scale = 2)
     private BigDecimal soldeRestant = BigDecimal.ZERO;
 
@@ -50,17 +53,19 @@ public class LeaveBalance {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+    
+
+    /**
+     * Recalcule le solde restant en tenant compte du cumul max (3 ans)
+     */
+    public void recalculerSoldesCumules() {
+        BigDecimal total = soldeInitial.add(soldeAcquis).subtract(soldePris);
+        this.soldeRestant = total;
+    }
+
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
-        // Calcul automatique du solde restant
-        this.soldeRestant = soldeInitial.add(soldeAcquis).subtract(soldePris);
+        recalculerSoldesCumules();
     }
-
-    @PrePersist
-    public void prePersist() {
-        this.soldeRestant = soldeInitial.add(soldeAcquis).subtract(soldePris);
-    }
-
-    // Constructeurs, getters et setters...
 }

@@ -1,126 +1,224 @@
 package com.itu.gest_emp.modules.paie.service;
 
+import com.itu.gest_emp.modules.paie.model.Cnaps;
+import com.itu.gest_emp.modules.paie.model.Irsa;
+import com.itu.gest_emp.modules.paie.model.Ostie;
+import com.itu.gest_emp.modules.paie.model.PayslipLinesRh;
 import com.itu.gest_emp.modules.paie.model.PayslipsRh;
+import com.itu.gest_emp.modules.paie.model.SalaryComponentsRh;
 import com.itu.gest_emp.modules.paie.model.SalaryParametersRh;
 import com.itu.gest_emp.modules.paie.repository.PayslipsRhRepository;
 import com.itu.gest_emp.modules.paie.repository.SalaryParametersRhRepository;
-import com.itu.gest_emp.modules.personnel.model.PersonnelRh;
+import com.itu.gest_emp.modules.personnel.model.ContractsRh;
 import com.itu.gest_emp.modules.personnel.service.ContractsRhService;
 import com.itu.gest_emp.modules.personnel.service.PersonnelRhService;
+import com.itu.gest_emp.modules.shared.model.SecteurActiviteEnum;
+import com.itu.gest_emp.modules.shared.service.CompanyInfoRhService;
+import com.itu.gest_emp.modules.temps_presence.model.OvertimeRh;
 import com.itu.gest_emp.modules.temps_presence.service.PaieIntegrationService;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PayslipService {
 
-    @Autowired
-    private PersonnelRhService personnelRhService;
+    private final PersonnelRhService personnelRhService;
+    private final SalaryComponentsService salaryComponentsService;
+    private final PaieIntegrationService paieIntegrationService;
+    private final ContractsRhService contractsRhService;
+    private final CompanyInfoRhService companyInfoRhService;
+    private final CnapsService cnapsService;
+    private final IrsaService irsaService;
+    private final OstieService ostieService;
+    private final PayslipsRhRepository payslipsRhRepository;
+    private final SalaryParametersRhRepository salaryParametersRhRepository;
+    private final com.itu.gest_emp.modules.paie.service.AvanceService avanceService;
+    private final com.itu.gest_emp.modules.paie.service.SalarySnapshotService salarySnapshotService;
 
-    @Autowired
-    private SalaryComponentsService salaryComponentsService;
+    private static final String STATUT_INACTIF = "inactif";
+    private static final String STATUT_BROUILLON = "brouillon";
+    private static final int MULTIPLICATEUR_SEUIL_CNAPS = 8;
 
-    @Autowired
-    private PaieIntegrationService paie;
-
-    @Autowired
-    private ContractsRhService contractsRhService;
-
-    public PersonnelRhService getPersonnelRhService() {
-        return personnelRhService;
-    }
-
-    @Autowired
-    private PayslipsRhRepository payslipsRhRepository;
-
-    @Autowired
-    private SalaryParametersRhRepository salaryParametersRhRepository;
-
+    @Transactional
     public Optional<PayslipsRh> generatePayslip(Long personnelId, Integer mois, Integer annee) {
-        // Vérifier si le bulletin existe déjà
-        if (payslipsRhRepository.existsByPersonnel_IdAndMoisAndAnnee(personnelId, mois, annee)) {
-            return Optional.empty();
+        // Vérification doublon
+        Optional<PayslipsRh> existing = payslipsRhRepository
+                .findByPersonnel_IdAndMoisAndAnnee(personnelId, mois, annee);
+        if (existing.isPresent()) {
+            return existing;
         }
 
-        // Logique de calcul du bulletin de paie
-        PayslipsRh payslip = new PayslipsRh();
-        payslip.setPersonnel(personnelRhService.findById(personnelId).orElseThrow());
-        payslip.setMois(mois);
-        payslip.setAnnee(annee);
+        LocalDate periodEndDate = YearMonth.of(annee, mois).atEndOfMonth();
+        ContractsRh contrat = contractsRhService.getContrat(personnelId, periodEndDate);
 
-        // Calculer le salaire de base (à implémenter avec ContractsRH)
-        BigDecimal salaireBase = calculateSalaireBase(personnelId, mois, annee);
-        payslip.setSalaireBase(salaireBase);
+        PayslipsRh payslip = initializePayslip(personnelId, mois, annee, contrat);
 
-        // Calculer les primes (à implémenter)
-        BigDecimal totalPrimes = calculateTotalPrimes(personnelId, mois, annee);
-        payslip.setTotalPrimes(totalPrimes);
+        calculateSalaryComponents(payslip, personnelId, mois, annee, contrat);
 
-        // Calculer les heures supplémentaires (à implémenter avec OvertimeRH)
-        BigDecimal heuresSupplementaires = calculateHeuresSupplementaires(personnelId, mois, annee);
-        payslip.setHeuresSupplementaires(heuresSupplementaires);
-
-        // Calculer le total brut
-        BigDecimal totalBrut = salaireBase.add(totalPrimes).add(heuresSupplementaires);
-        payslip.setTotalBrut(totalBrut);
-
-        // Calculer les retenues
-        calculateRetenues(payslip, totalBrut);
-
-        // Calculer le net à payer
-        BigDecimal netAPayer = totalBrut.subtract(payslip.getTotalRetenues());
-        payslip.setNetAPayer(netAPayer);
-
-        payslip.setStatut("brouillon");
-        payslip.setCreatedAt(java.time.LocalDateTime.now());
+        generatePayslipLines(payslip);
 
         return Optional.of(payslipsRhRepository.save(payslip));
     }
 
-    private BigDecimal calculateSalaireBase(Long personnelId, Integer mois, Integer annee) {
-        return contractsRhService.getSalaireBase(personnelId, mois, annee);
+    private PayslipsRh initializePayslip(Long personnelId, Integer mois, Integer annee, ContractsRh contrat) {
+        PayslipsRh payslip = new PayslipsRh();
+        payslip.setPersonnel(personnelRhService.findById(personnelId)
+                .orElseThrow(() -> new IllegalArgumentException("Personnel introuvable : " + personnelId)));
+        payslip.setMois(mois);
+        payslip.setAnnee(annee);
+        payslip.setStatut(STATUT_BROUILLON);
+        payslip.setCreatedAt(LocalDateTime.now());
+
+        if (isContractInactive(contrat)) {
+            payslip.setIndemnitePreavis(getValueOrZero(contrat.getIndemnitePreavis()));
+            payslip.setRetenuePreavis(getValueOrZero(contrat.getRetenuePreavis()));
+        } else {
+            payslip.setIndemnitePreavis(BigDecimal.ZERO);
+            payslip.setRetenuePreavis(BigDecimal.ZERO);
+        }
+
+        return payslip;
     }
 
-    private BigDecimal calculateTotalPrimes(Long personnelId, Integer mois, Integer annee) {
-        return salaryComponentsService.calculateTotalPrimes(personnelId, mois, annee);
+    private void calculateSalaryComponents(PayslipsRh payslip, Long personnelId,
+            Integer mois, Integer annee, ContractsRh contrat) {
+        // Salaire de base via snapshot (cache) pour éviter appels répétés
+        com.itu.gest_emp.modules.paie.model.PersonnelSalarySnapshot snapshot = null;
+        try {
+            snapshot = salarySnapshotService.getSnapshot(personnelId, mois, annee);
+        } catch (Exception e) {
+            // fallback to direct retrieval
+        }
+
+        BigDecimal salaireBase = snapshot != null && snapshot.getSalaireBase() != null
+                ? snapshot.getSalaireBase()
+                : contractsRhService.getSalaireBase(personnelId, mois, annee);
+
+        payslip.setSalaireBase(salaireBase);
+
+        // Primes
+        List<SalaryComponentsRh> activeComponents = salaryComponentsService
+                .getActiveComponentsByPersonnelAndDate(personnelId, mois, annee);
+        int ordre = payslip.getLignes().size() + 1;
+        for (SalaryComponentsRh composante : activeComponents) {
+            payslip.getLignes().add(createPrimeLine(payslip, composante, ordre++));
+        }
+
+        BigDecimal totalPrimes = salaryComponentsService.calculateTotalPrimes(activeComponents);
+        payslip.setTotalPrimes(totalPrimes);
+
+        // Export données temps & présence
+        Map<String, Object> exportData = paieIntegrationService.exportDataForPaie(
+                mois, annee, payslip.getPersonnel(), snapshot);
+
+        processTimeAndAttendanceData(payslip, exportData, contrat);
+
+        // Total brut
+        BigDecimal totalBrut = salaireBase.add(totalPrimes).add(payslip.getHeuresSupplementaires());
+        payslip.setTotalBrut(totalBrut);
+
+        // Retenues
+        calculateDeductions(payslip, totalBrut);
+
+        // Avances approuvées pour la période — récupération en une seule requête
+        try {
+            List<com.itu.gest_emp.modules.paie.model.Avance> avancesList = avanceService.getApprovedAdvancesForPeriod(personnelId, mois, annee);
+            java.math.BigDecimal totalAvances = avancesList.stream()
+                    .map(a -> a.getMontant() != null ? a.getMontant() : java.math.BigDecimal.ZERO)
+                    .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+            // Stocker le total dans l'entité payslip (champ `avances`) pour reporting
+            payslip.setAvances(getValueOrZero(totalAvances));
+
+            // Ajouter une ligne détaillée par avance (évite appels DB répétés)
+            int ordreAv = payslip.getLignes().size() + 1;
+            for (com.itu.gest_emp.modules.paie.model.Avance av : avancesList) {
+                String code = "AVANCE_" + av.getId();
+                String label = "Avance (" + (av.getDateDecision() != null ? av.getDateDecision().toLocalDate().toString() : av.getDateDemande().toLocalDate().toString()) + ") - " + (av.getMotif() != null ? av.getMotif() : "");
+                payslip.getLignes().add(createLine(payslip, code, label, "RETENUE", null, av.getMontant(), ordreAv++));
+            }
+        } catch (Exception e) {
+            // ignore failures retrieving avances to avoid breaking paie generation
+        }
+
+        // Net à payer
+        calculateNetPayment(payslip);
     }
 
-    private BigDecimal calculateHeuresSupplementaires(Long personnelId, Integer mois, Integer annee) {
-        return (BigDecimal) (paie.exportDataForPaie(personnelId, mois, annee).get("totalMontantHs"));
+    @SuppressWarnings("unchecked")
+    private void processTimeAndAttendanceData(PayslipsRh payslip, Map<String, Object> exportData,
+            ContractsRh contrat) {
+        BigDecimal totalMontantAbsence = (BigDecimal) exportData.getOrDefault(
+                "totalMontantAbsencesDeduites", BigDecimal.ZERO);
+        BigDecimal totalMontantRetard = (BigDecimal) exportData.getOrDefault(
+                "totalMontantRetard", BigDecimal.ZERO);
+        BigDecimal totalHS = (BigDecimal) exportData.getOrDefault(
+                "totalMontantHs", BigDecimal.ZERO);
+        List<OvertimeRh> heuresSup = (List<OvertimeRh>) exportData.getOrDefault(
+                "overtimes", new ArrayList<>());
+
+        // Ajout des lignes d'heures supplémentaires
+        int ordre = payslip.getLignes().size() + 1;
+        for (OvertimeRh overtime : heuresSup) {
+            payslip.getLignes().add(createOvertimeLine(payslip, overtime, ordre++));
+        }
+
+        payslip.setTotalMontantAbsence(totalMontantAbsence);
+        payslip.setTotalMontantRetard(totalMontantRetard);
+        payslip.setHeuresSupplementaires(totalHS);
+
+        // Valeur droit congé uniquement si contrat inactif
+        if (isContractInactive(contrat)) {
+            BigDecimal valeurDroitConge = (BigDecimal) exportData.getOrDefault(
+                    "valeurDroitConge", BigDecimal.ZERO);
+            payslip.setValeurDroitConge(valeurDroitConge);
+        } else {
+            payslip.setValeurDroitConge(BigDecimal.ZERO);
+        }
     }
 
-    private void calculateRetenues(PayslipsRh payslip, BigDecimal totalBrut) {
-        LocalDate currentDate = LocalDate.now();
+    private void calculateDeductions(PayslipsRh payslip, BigDecimal totalBrut) {
+        SecteurActiviteEnum secteur = companyInfoRhService.getSecteurActivite();
 
-        // Calcul CNAPS (1% employé, 13% employeur)
-        BigDecimal tauxCnapsEmployee = getTauxByNomParam("CNAPS_EMPLOYEE");
-        BigDecimal cnapsEmployee = totalBrut.multiply(tauxCnapsEmployee).divide(BigDecimal.valueOf(100));
+        // Calcul du plafond CNAPS
+        BigDecimal smig = getParameterValue("smig");
+        BigDecimal seuilCnaps = smig.multiply(BigDecimal.valueOf(MULTIPLICATEUR_SEUIL_CNAPS));
+        BigDecimal baseCnaps = totalBrut.min(seuilCnaps);
+
+        // CNAPS
+        Cnaps cnaps = cnapsService.loadCurrent(secteur);
+        cnaps.setSalaireBrut(baseCnaps);
+        BigDecimal cnapsEmployee = cnaps.cotisationEmploye();
+        BigDecimal cnapsEmployer = cnaps.cotisationEmployeur();
         payslip.setCnapsEmployee(cnapsEmployee);
-
-        BigDecimal tauxCnapsEmployer = getTauxByNomParam("CNAPS_EMPLOYER");
-        BigDecimal cnapsEmployer = totalBrut.multiply(tauxCnapsEmployer).divide(BigDecimal.valueOf(100));
         payslip.setCnapsEmployer(cnapsEmployer);
 
-        // Calcul OSTIE (1% employé, 5% employeur)
-        BigDecimal tauxOstieEmployee = getTauxByNomParam("OSTIE_EMPLOYEE");
-        BigDecimal ostieEmployee = totalBrut.multiply(tauxOstieEmployee).divide(BigDecimal.valueOf(100));
+        // OSTIE
+        Ostie ostie = ostieService.loadCurrent(totalBrut);
+        BigDecimal ostieEmployee = ostie.cotisationEmploye();
+        BigDecimal ostieEmployer = ostie.cotisationEmployeur();
         payslip.setOstieEmployee(ostieEmployee);
-
-        BigDecimal tauxOstieEmployer = getTauxByNomParam("OSTIE_EMPLOYER");
-        BigDecimal ostieEmployer = totalBrut.multiply(tauxOstieEmployer).divide(BigDecimal.valueOf(100));
         payslip.setOstieEmployer(ostieEmployer);
 
-        // Calcul IRSA (progressif par tranches - à implémenter complètement)
-        BigDecimal irsa = calculateIRSA(totalBrut);
+        // Montant imposable
+        BigDecimal montantImposable = totalBrut.subtract(cnapsEmployee).subtract(ostieEmployee);
+        payslip.setMontantImposable(montantImposable);
+
+        // IRSA
+        List<Irsa> tranches = irsaService.getTranchesByDate(LocalDate.now());
+        BigDecimal irsa = addIrsaLines(payslip, montantImposable, tranches);
         payslip.setIrsa(irsa);
 
         // Total retenues
@@ -128,50 +226,204 @@ public class PayslipService {
         payslip.setTotalRetenues(totalRetenues);
     }
 
-    private BigDecimal getTauxByNomParam(String nomParam) {
-        return salaryParametersRhRepository.findByNomParametre(nomParam)
-                .map(SalaryParametersRh::getValeur)
-                .orElseThrow(() -> new IllegalArgumentException("Paramètre salaire introuvable : " + nomParam));
+    private BigDecimal addIrsaLines(PayslipsRh payslip, BigDecimal montantImposable, List<Irsa> tranches) {
+        BigDecimal irsaTotal = BigDecimal.ZERO;
+        int ordre = payslip.getLignes().size() + 1;
+
+        for (Irsa tranche : tranches) {
+            BigDecimal impotTranche = irsaService.calculerIrsaPourTranche(montantImposable, tranche);
+            if (impotTranche.compareTo(BigDecimal.ZERO) > 0) {
+                PayslipLinesRh line = createIrsaLine(payslip, tranche, impotTranche, ordre++);
+                payslip.getLignes().add(line);
+                irsaTotal = irsaTotal.add(impotTranche);
+            }
+        }
+        return irsaTotal;
     }
 
-    private BigDecimal calculateIRSA(BigDecimal totalBrutMensuel) {
+    private void calculateNetPayment(PayslipsRh payslip) {
+        BigDecimal netAPayer = payslip.getTotalBrut()
+                .subtract(payslip.getTotalRetenues())
+                .add(payslip.getIndemnitePreavis())
+                .subtract(payslip.getRetenuePreavis())
+                .subtract(payslip.getTotalMontantAbsence())
+                .subtract(payslip.getTotalMontantRetard())
+                .add(payslip.getValeurDroitConge());
 
-        // Récupérer les tranches IRSA actives, ordonnées par seuil_min
-        List<SalaryParametersRh> tranches = salaryParametersRhRepository
-                .findActiveParametersByCategorieAndDate("irsa", LocalDate.now())
-                .stream()
-                .sorted(Comparator.comparing(t -> t.getSeuilMin() == null ? BigDecimal.ZERO : t.getSeuilMin()))
-                .collect(Collectors.toList());
-        BigDecimal irsa = BigDecimal.ZERO;
-
-        for (SalaryParametersRh tranche : tranches) {
-            BigDecimal seuilMin = tranche.getSeuilMin();
-            BigDecimal seuilMax = tranche.getSeuilMax();
-            BigDecimal taux = tranche.getValeur();
-            BigDecimal tmp = totalBrutMensuel.multiply(taux.divide(new BigDecimal(100)));
-            irsa = irsa.add(tmp);
-            if (seuilMax != null) {
-                if (seuilMin.compareTo(totalBrutMensuel) <= 0 && seuilMax.compareTo(totalBrutMensuel) >= 0) {
-                    break;
-                }
-            } else {
-                if (seuilMin.compareTo(totalBrutMensuel) <= 0) {
-                    break;
-                }
-
-            }
-
+        // Soustraire avances (champ dédié dans PayslipsRh)
+        if (payslip.getAvances() != null) {
+            netAPayer = netAPayer.subtract(payslip.getAvances());
         }
 
-        // Retourner l'IRSA mensuel
-        return irsa;
+        payslip.setNetAPayer(netAPayer);
     }
 
+    private void generatePayslipLines(PayslipsRh payslip) {
+        List<PayslipLinesRh> lignes = new ArrayList<>();
+        int ordre = 1;
+
+        // Gains
+        lignes.add(createLine(payslip, "SB", "Salaire de base", "GAIN",
+                null, payslip.getSalaireBase(), ordre++));
+
+        if (isPositive(payslip.getTotalPrimes())) {
+            lignes.add(createLine(payslip, "PRIMES", "Primes", "GAIN",
+                    null, payslip.getTotalPrimes(), ordre++));
+        }
+
+        if (isPositive(payslip.getHeuresSupplementaires())) {
+            lignes.add(createLine(payslip, "HS", "Heures supplémentaires", "GAIN",
+                    null, payslip.getHeuresSupplementaires(), ordre++));
+        }
+
+        if (isPositive(payslip.getValeurDroitConge())) {
+            lignes.add(createLine(payslip, "DROIT_CONGE", "Droits de congés", "GAIN",
+                    null, payslip.getValeurDroitConge(), ordre++));
+        }
+
+        if (isPositive(payslip.getIndemnitePreavis())) {
+            lignes.add(createLine(payslip, "DROIT_PREAVIS", "Indemnité préavis", "GAIN",
+                    null, payslip.getIndemnitePreavis(), ordre++));
+        }
+
+        // Retenues
+        if (isPositive(payslip.getRetenuePreavis())) {
+            lignes.add(createLine(payslip, "RET_PREAVIS", "Retenue préavis", "RETENUE",
+                    null, payslip.getRetenuePreavis(), ordre++));
+        }
+
+        if (isPositive(payslip.getTotalMontantAbsence())) {
+            lignes.add(createLine(payslip, "ABS", "Absences", "RETENUE",
+                    null, payslip.getTotalMontantAbsence(), ordre++));
+        }
+
+        if (isPositive(payslip.getTotalMontantRetard())) {
+            lignes.add(createLine(payslip, "RETARD", "Retards", "RETENUE",
+                    null, payslip.getTotalMontantRetard(), ordre++));
+        }
+
+        if (isPositive(payslip.getCnapsEmployee())) {
+            lignes.add(createLine(payslip, "COT_CNAPS", "CNAPS employé", "RETENUE",
+                    null, payslip.getCnapsEmployee(), ordre++));
+        }
+
+        if (isPositive(payslip.getOstieEmployee())) {
+            lignes.add(createLine(payslip, "COT_OSTIE", "OSTIE employé", "RETENUE",
+                    null, payslip.getOstieEmployee(), ordre++));
+        }
+
+        if (isPositive(payslip.getIrsa())) {
+            lignes.add(createLine(payslip, "IRSA", "IRSA", "RETENUE",
+                    null, payslip.getIrsa(), ordre++));
+        }
+
+        if (isPositive(payslip.getAutresRetenues())) {
+            lignes.add(createLine(payslip, "AUTRES_RET", "Autres retenues", "RETENUE",
+                    null, payslip.getAutresRetenues(), ordre++));
+        }
+
+        if (isPositive(payslip.getAutresIndemnites())) {
+            lignes.add(createLine(payslip, "AUTRES_INDT", "Autres indemnités", "GAIN",
+                    null, payslip.getAutresIndemnites(), ordre++));
+        }
+
+        payslip.getLignes().addAll(lignes);
+    }
+
+    // Méthodes utilitaires
+    private PayslipLinesRh createLine(PayslipsRh payslip, String code, String label,
+            String type, BigDecimal taux, BigDecimal montant, int ordre) {
+        PayslipLinesRh line = new PayslipLinesRh();
+        line.setPayslip(payslip);
+        line.setCode(code);
+        line.setLabel(label);
+        line.setType(type);
+        line.setTaux(taux);
+        line.setMontant(montant);
+        line.setOrdre(ordre);
+        return line;
+    }
+
+    private PayslipLinesRh createPrimeLine(PayslipsRh payslip,
+            SalaryComponentsRh composante, int ordre) {
+        String code = "PRIME_" + composante.getId() + " " + composante.getTypeComposante();
+        String label = composante.getDescription();
+        return createLine(payslip, code, label, "GAIN",
+                null, composante.getMontant(), ordre);
+    }
+
+    private PayslipLinesRh createOvertimeLine(PayslipsRh payslip, OvertimeRh overtime, int ordre) {
+        String code = "HS_" + overtime.getId() + " " + overtime.getTypeHs().getDescription();
+        String label = "Heures sup. (" + overtime.getDateHs().toString() + ")";
+        return createLine(payslip, code, label, "GAIN",
+                overtime.getTypeHs().getTauxMajoration(),
+                overtime.getMontantHs(), ordre);
+    }
+
+    private PayslipLinesRh createIrsaLine(PayslipsRh payslip, Irsa tranche,
+            BigDecimal impotTranche, int ordre) {
+        String code = "IRSA" + tranche.getNumeroTranche();
+        String label = String.format("Tranche IRSA de: %s à %s",
+                tranche.getSeuilMin(), tranche.getSeuilMax());
+        return createLine(payslip, code, label, "RETENUE",
+                tranche.getTaux(), impotTranche, ordre);
+    }
+
+    private BigDecimal getParameterValue(String nomParam) {
+        return salaryParametersRhRepository
+                .findActiveByNomParametre(nomParam, LocalDate.now())
+                .map(SalaryParametersRh::getValeur)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Paramètre introuvable : " + nomParam));
+    }
+
+    private boolean isContractInactive(ContractsRh contrat) {
+        return STATUT_INACTIF.equalsIgnoreCase(contrat.getStatut());
+    }
+
+    private BigDecimal getValueOrZero(BigDecimal value) {
+        return value != null ? value : BigDecimal.ZERO;
+    }
+
+    private boolean isPositive(BigDecimal value) {
+        return value != null && value.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    // Méthodes de consultation
     public List<PayslipsRh> getPayslipsByPersonnel(Long personnelId) {
         return payslipsRhRepository.findByPersonnel_IdOrderByAnneeDescMoisDesc(personnelId);
     }
 
     public List<PayslipsRh> getPayslipsByPeriod(Integer mois, Integer annee) {
         return payslipsRhRepository.findByMoisAndAnnee(mois, annee);
+    }
+
+    public PayslipsRh findById(Long id) {
+        return payslipsRhRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Bulletin introuvable avec l'ID : " + id));
+    }
+
+    public List<PayslipsRh> findAll() {
+        return payslipsRhRepository.findAll();
+    }
+
+    @Transactional
+    public void deleteById(Long id) {
+        payslipsRhRepository.deleteById(id);
+    }
+
+    // Méthodes d'export (à implémenter)
+    public byte[] generatePdf(Long id) {
+        // TODO: Implémenter la génération PDF
+        throw new UnsupportedOperationException("Génération PDF non implémentée");
+    }
+
+    public byte[] generateExcel(Long id) {
+        // TODO: Implémenter la génération Excel
+        throw new UnsupportedOperationException("Génération Excel non implémentée");
+    }
+
+    public PersonnelRhService getPersonnelRhService() {
+        return personnelRhService;
     }
 }

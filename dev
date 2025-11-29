@@ -1,0 +1,23 @@
+RESSOURCES HUMAINES 
+1. FONCTIONNALITÉS ESSENTIELLES (Base RH) 
+A. Gestion du personnel 
+ Fiche employé complète (identité, contact, poste, photo, etc.) 
+ Suivi du contrat de travail (type, durée, période d’essai, renouvellement) 
+ Historique des postes, promotions, mobilités 
+ Gestion des documents RH (CIN, diplômes, attestations, etc.) 
+B. Gestion des absences et congés 
+ Suivi des soldes de congés (payés, maladie, exceptionnels) 
+ Workflow de demande et validation hiérarchique 
+ Intégration avec le calendrier de l’entreprise 
+ Alertes automatiques pour congés non validés ou absences répétées 
+C. Gestion du temps et des présences 
+ Feuille de temps / pointage (manuel ou automatique via badgeuse ou application 
+mobile) 
+ Heures supplémentaires, retards, pauses 
+ Génération automatique du relevé de présence 
+ Interface d’intégration avec la paie 
+D. Gestion de la paie (base) 
+ Fiches de paie mensuelles (salaire brut, retenues, net à payer) 
+ Paramétrage des taux CNAPS, OSTIE, IRSA, etc.  
+ Gestion des primes, avances, heures supplémentaires, absences 
+ Export vers format comptable ou PDF

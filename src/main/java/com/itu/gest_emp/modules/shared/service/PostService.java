@@ -30,6 +30,10 @@ public class PostService {
         return postRepository.save(post);
     }
 
+    public List<Post> findByServiceId(Long serviceId){
+        return postRepository.findByEquipe_Service_Id(serviceId);
+    }
+
     // Mettre à jour un post existant
     public Post updatePost(Long id, Post postDetails) {
         Optional<Post> optionalPost = postRepository.findById(id);

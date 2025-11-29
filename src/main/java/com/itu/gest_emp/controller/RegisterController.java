@@ -67,8 +67,8 @@ public class RegisterController {
             }
 
             // Créer la nouvelle personne
-            Person newPerson = new Person(nom, prenom, adresse, dateNaissance, contact, mdp, pdpPath);
-            
+            Person newPerson = new Person(nom, prenom, adresse, dateNaissance, contact, pdpPath);
+
             // Sauvegarder la personne
             personService.savePerson(newPerson);
 
@@ -80,38 +80,39 @@ public class RegisterController {
             return "register";
         }
     }
+
     @GetMapping("/login")
-public String showLoginForm(Model model) {
-    return "login";
-}
-  @GetMapping("/test")
-public String showTest(Model model) {
-    return "candidatecreate";
-}
-   // Traitement de la connexion
+    public String showLoginForm(Model model) {
+        return "login";
+    }
+
+    @GetMapping("/test")
+    public String showTest(Model model) {
+        return "candidatecreate";
+    }
+
+    // Traitement de la connexion
     @PostMapping("/login")
-    public String processLogin(@RequestParam String contact, 
-                              @RequestParam String mdp, 
-                              Model model, 
-                              HttpSession session) {
-        
+    public String processLogin(@RequestParam String contact,
+            @RequestParam String mdp,
+            Model model,
+            HttpSession session) {
+
         Person person = personService.findByContact(contact);
-        
-        if (person == null || !person.getMdp().equals(mdp)) {
-            model.addAttribute("error", "Contact ou mot de passe incorrect");
-            return "login";
-        }
-        
+
+        // if (person == null || !person.getMdp().equals(mdp)) {
+        //     model.addAttribute("error", "Contact ou mot de passe incorrect");
+        //     return "login";
+        // }
+
         // Connexion réussie - stocker l'utilisateur en session
         session.setAttribute("user", person);
-            List<Notification> notifications = notificationService.getNotificationsByPerson(person);
-            session.setAttribute("notifications", notifications);
-            int countNotif=notifications.size();
-            System.out.println("liste de notif "+countNotif);
-            session.setAttribute("Nombrenotifications", countNotif);
+        List<Notification> notifications = notificationService.getNotificationsByPerson(person);
+        session.setAttribute("notifications", notifications);
+        int countNotif = notifications.size();
+        System.out.println("liste de notif " + countNotif);
+        session.setAttribute("Nombrenotifications", countNotif);
 
-        
-        
         return "redirect:/offers";
     }
 }

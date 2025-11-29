@@ -21,7 +21,7 @@ public class Notification {
     private String message;
 
     @ManyToOne
-    @JoinColumn(name = "id_appliance", nullable = false)
+    @JoinColumn(name = "id_appliance")
     private Appliance appliance;
     
   

@@ -67,17 +67,17 @@ public class ReportService {
 
         // Regroupement par service
         Map<Object, Long> presentsParService = allAttendances.stream()
-                .filter(a -> a.getPersonnel().getPost() != null && a.getPersonnel().getPost().getService() != null)
+                .filter(a -> a.getPersonnel().getPost() != null && a.getPersonnel().getPost().getEquipe().getService() != null)
                 .filter(a -> "present".equals(a.getStatut()) || "retard".equals(a.getStatut()))
                 .collect(Collectors.groupingBy(
-                        a -> a.getPersonnel().getPost().getService().getId(),
+                        a -> a.getPersonnel().getPost().getEquipe().getService().getId(),
                         Collectors.counting()));
 
         Map<Object, Long> retardsParService = allAttendances.stream()
-                .filter(a -> a.getPersonnel().getPost() != null && a.getPersonnel().getPost().getService() != null)
+                .filter(a -> a.getPersonnel().getPost() != null && a.getPersonnel().getPost().getEquipe().getService() != null)
                 .filter(a -> "retard".equals(a.getStatut()))
                 .collect(Collectors.groupingBy(
-                        a -> a.getPersonnel().getPost().getService().getId(),
+                        a -> a.getPersonnel().getPost().getEquipe().getService().getId(),
                         Collectors.counting()));
 
         return Map.of(

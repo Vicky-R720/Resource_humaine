@@ -1,3 +1,4 @@
+<!-- personnel-list.html -->
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 
@@ -171,7 +172,7 @@
     <div class="container">
         <div class="header">
             <h1>📋 Liste des Employés</h1>
-            <button class="btn btn-primary" onclick="window.location.href='personnel-create.html'">
+            <button class="btn btn-primary" onclick="window.location.href='/personnel/new'">
                 ➕ Ajouter un employé
             </button>
         </div>
@@ -193,7 +194,10 @@
                 <label>Poste</label>
                 <select id="posteFilter">
                     <option value="">Tous les postes</option>
+                    <option th:each="post : ${posts}" th:value="${post.name}" th:text="${post.name}">
+                    </option>
                 </select>
+
             </div>
         </div>
 
@@ -225,7 +229,7 @@
                     </td>
                     <td class="actions">
                         <button class="btn btn-icon btn-view"
-                            th:onclick="'window.location.href=\'/personnel/page/detail/' + ${p.id} + '\';'">👁️</button>
+                            th:onclick="'window.location.href=\'/personnel/' + ${p.id} + '\';'">👁️</button>
                         <button class="btn btn-icon btn-edit"
                             th:onclick="'window.location.href=\'personnel-edit.html?id=' + ${p.id} + '\';'">✏️</button>
                         <button class="btn btn-icon btn-delete"
@@ -241,7 +245,7 @@
         async function deletePersonnel(id) {
             if (confirm('Êtes-vous sûr de vouloir supprimer cet employé ?')) {
                 try {
-                    await fetch(`/personnel/api/${id}`, { method: 'DELETE' });
+                    await fetch(`api/personnel/${id}`, { method: 'DELETE' });
                     alert('Employé supprimé avec succès');
                     window.location.reload();
                 } catch (error) {
@@ -250,13 +254,42 @@
             }
         }
 
-        // Filtres côté client si nécessaire
         document.getElementById('searchInput').addEventListener('input', filterPersonnel);
         document.getElementById('statutFilter').addEventListener('change', filterPersonnel);
+        document.getElementById('posteFilter').addEventListener('change', filterPersonnel);
+
 
         function filterPersonnel() {
-            // implémentation des filtres JS sur le tbody si souhaité
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            const statutValue = document.getElementById('statutFilter').value.toLowerCase();
+            const posteValue = document.getElementById('posteFilter').value.toLowerCase();
+
+            const rows = document.querySelectorAll('#personnelBody tr');
+
+            rows.forEach(row => {
+                const matricule = row.children[1].textContent.toLowerCase();
+                const nomPrenom = row.children[2].textContent.toLowerCase();
+                const poste = row.children[3].textContent.toLowerCase();
+                const statut = row.children[6].textContent.toLowerCase().trim();
+
+
+                let matchSearch =
+                    matricule.includes(searchValue) ||
+                    nomPrenom.includes(searchValue) ||
+                    poste.includes(searchValue);
+
+                let matchStatut = statutValue === "" || statut === statutValue;
+                let matchPoste = posteValue === "" || poste === posteValue;
+                
+
+                if (matchSearch && matchStatut && matchPoste) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
         }
+
     </script>
 </body>
 

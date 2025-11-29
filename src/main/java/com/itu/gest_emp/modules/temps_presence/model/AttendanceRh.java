@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.time.Duration;
 
 import com.itu.gest_emp.modules.personnel.model.PersonnelRh;
-import com.itu.gest_emp.modules.shared.model.Person;
+import com.itu.gest_emp.modules.shared.model.Utilisateur;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -60,7 +60,7 @@ public class AttendanceRh {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "validated_by")
-    private Person validatedBy;
+    private Utilisateur validatedBy;
 
     @Column(name = "is_validated")
     private Boolean isValidated = false;

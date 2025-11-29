@@ -5,7 +5,6 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-
 import com.itu.gest_emp.modules.shared.model.Person;
 import com.itu.gest_emp.modules.shared.model.Post;
 
@@ -94,5 +93,4 @@ public class PersonnelRh {
         this.updatedAt = LocalDateTime.now();
     }
 
-  
 }

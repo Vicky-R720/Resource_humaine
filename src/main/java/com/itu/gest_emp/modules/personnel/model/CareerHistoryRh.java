@@ -18,40 +18,40 @@ public class CareerHistoryRh {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @ManyToOne
     @JoinColumn(name = "personnel_id")
     private PersonnelRh personnel;
-    
+
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
-    
+
     @Column(nullable = false, length = 50)
     private String typeMouvement;
-    
+
     @Column(length = 255)
     private String ancienPoste;
-    
+
     @Column(length = 255)
     private String nouveauPoste;
-    
+
     @Column(precision = 15, scale = 2)
     private BigDecimal ancienSalaire;
-    
+
     @Column(precision = 15, scale = 2)
     private BigDecimal nouveauSalaire;
-    
+
     @Column(nullable = false)
     private LocalDate dateMouvement;
-    
+
     @Column(columnDefinition = "TEXT")
     private String motif;
-    
+
     @ManyToOne
     @JoinColumn(name = "created_by")
     private Person createdBy;
-    
+
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }
