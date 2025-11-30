@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Demandes d'avances</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f3f3f3; }
+        .container { max-width: 1100px; margin: auto; padding: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .btn { padding: 8px 14px; border-radius: 4px; text-decoration: none; color: white; }
+        .btn-primary { background:#007bff }
+        .btn-success { background:#28a745 }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; }
+        th { background:#fafafa }
+        .small { font-size: 13px; color:#666 }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="card">
+        <h2>Demandes d'avances</h2>
+        <a href="/modules/paie/avances/new" class="btn btn-primary">Nouvelle demande</a>
+    </div>
+
+    <div class="card">
+        <table id="avancesTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Employé</th>
+                    <th>Montant</th>
+                    <th>Motif</th>
+                    <th>Date demande</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Server-side rendering if available -->
+                <tr th:each="a : ${avances}">
+                    <td th:text="${a.id}"></td>
+                    <td th:text="${a.personnel.person.fullName}"></td>
+                    <td th:text="${#numbers.formatInteger(a.montant,0,'WHITESPACE')} + ' Ar'"></td>
+                    <td th:text="${a.motif}"></td>
+                    <td th:text="${#temporals.format(a.dateDemande,'dd/MM/yyyy')}"></td>
+                    <td th:text="${a.statut}"></td>
+                    <td>
+                        <a th:href="@{/modules/paie/avances/{id}(id=${a.id})}" class="btn btn-success">Voir</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    // Progressive enhancement: if table empty, fetch from API
+    (function(){
+        const tbody = document.querySelector('#avancesTable tbody');
+        if (tbody && tbody.children.length === 0) {
+            fetch('/api/paie/avances')
+                .then(r => r.json())
+                .then(list => {
+                    list.forEach(a => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${a.id}</td>
+                            <td>${a.personnel ? (a.personnel.person ? (a.personnel.person.prenom + ' ' + a.personnel.person.nom) : '') : ''}</td>
+                            <td>${a.montant ? a.montant + ' Ar' : ''}</td>
+                            <td>${a.motif || ''}</td>
+                            <td>${a.dateDemande ? new Date(a.dateDemande).toLocaleDateString() : ''}</td>
+                            <td>${a.statut || ''}</td>
+                            <td><a class="btn btn-success" href="/modules/paie/avances/${a.id}">Voir</a></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }).catch(e => console.error(e));
+        }
+    })();
+</script>
+
+</body>
+</html>

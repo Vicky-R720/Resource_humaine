@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Heures Supplémentaires</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <h1>Liste des Heures Supplémentaires</h1>
+
+    <a th:href="@{/temps_presence/overtime/create}">Créer une nouvelle heure supplémentaire</a>
+    <a th:href="@{/temps_presence/overtime/en-attente}">Voir en attente de validation</a>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Personnel</th>
+                <th>Attendance ID</th>
+                <th>Date</th>
+                <th>Nombre d'heures</th>
+                <th>Type</th>
+                <th>Salaire horaire</th>
+                <th>Montant HS</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="overtime : ${overtimes}">
+                <td th:text="${overtime.id}"></td>
+                <td th:text="${overtime.personnel.person.nom}"></td>
+                <td th:text="${overtime.attendance != null ? overtime.attendance.id : '-'}"></td>
+                <td th:text="${#temporals.format(overtime.dateHs, 'dd/MM/yyyy')}"></td>
+                <td th:text="${overtime.nombreHeures}"></td>
+                <td th:text="${overtime.typeHs}"></td>
+                <td th:text="${overtime.salaireHoraireBase}"></td>
+                <td th:text="${overtime.montantHs}"></td>
+                <td th:text="${overtime.statut}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${success}" style="color:green" th:text="${success}"></div>
+    <div th:if="${error}" style="color:red" th:text="${error}"></div>
+</body>
+</html>

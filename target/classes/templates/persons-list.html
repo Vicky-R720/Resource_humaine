@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Job - Liste des Candidats</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .candidate-card {
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .match-score {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .match-high { color: #28a745; }
+        .match-medium { color: #ffc107; }
+        .match-low { color: #dc3545; }
+
+        .progress {
+            height: 8px;
+        }
+
+        .candidate-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .filter-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #dee2e6;
+        }
+
+        .filter-title {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: #6c757d;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-select, .form-control {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            transition: all 0.2s;
+        }
+
+        .form-select:focus, .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-validate {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-validate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-procedure {
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 8px 20px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(111, 66, 193, 0.3);
+        }
+
+        .btn-procedure:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.4);
+            color: white;
+        }
+
+        .reset-filters {
+            color: #6c757d;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .reset-filters:hover {
+            color: #007bff;
+        }
+
+        .info-badge {
+            background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin-right: 5px;
+        }
+
+        .info-personal {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .info-personal h6 {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .info-value {
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .candidate-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-users me-2"></i>Portal Job - Candidats
+            </a>
+            <div class="d-flex">
+                <a class="btn btn-validate me-3" href="/persons/verification">
+                    <i class="fas fa-check-circle me-1"></i>Valider Sélection
+                </a>
+                <a href="/persons/create" class="btn btn-light me-2">
+                    <i class="fas fa-plus me-1"></i>Ajouter Candidat
+                </a>
+                <a href="#" class="btn btn-light">
+                    <i class="fas fa-cog me-1"></i>Admin
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Section des filtres -->
+        <div class="filter-section">
+            <h4 class="filter-title">
+                <i class="fas fa-filter"></i>
+                Filtres de recherche
+            </h4>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="filter-group">
+                        <label for="ageFilter">Âge</label>
+                        <select class="form-select" id="ageFilter">
+                            <option value="">Tous les âges</option>
+                            <option value="18-25">18-25 ans</option>
+                            <option value="26-35">26-35 ans</option>
+                            <option value="36-45">36-45 ans</option>
+                            <option value="46-55">46-55 ans</option>
+                            <option value="55+">55+ ans</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="filter-group">
+                        <label for="diplomaFilter">Diplôme</label>
+                        <select class="form-select" id="diplomaFilter">
+                            <option value="">Tous diplômes</option>
+                            <option value="bac">Baccalauréat</option>
+                            <option value="bac+2">Bac+2</option>
+                            <option value="bac+3">Bac+3/Licence</option>
+                            <option value="bac+5">Bac+5/Master</option>
+                            <option value="doctorat">Doctorat</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="filter-group">
+                        <label for="experienceFilter">Expérience</label>
+                        <select class="form-select" id="experienceFilter">
+                            <option value="">Toute expérience</option>
+                            <option value="0-1">0-1 an</option>
+                            <option value="2-3">2-3 ans</option>
+                            <option value="4-7">4-7 ans</option>
+                            <option value="8-15">8-15 ans</option>
+                            <option value="15+">15+ ans</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="filter-group">
+                        <label for="locationFilter">Localisation</label>
+                        <input type="text" class="form-control" id="locationFilter" placeholder="Ville, région...">
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <a href="#" class="reset-filters" onclick="resetFilters()">
+                    <i class="fas fa-undo me-1"></i>Réinitialiser les filtres
+                </a>
+                <button class="btn btn-primary" onclick="applyFilters()">
+                    <i class="fas fa-search me-1"></i>Appliquer les filtres
+                </button>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Liste des Candidats</h2>
+            <span class="badge bg-primary fs-6" th:text="${#lists.size(persons)} + ' candidat(s) trouvé(s)'">0 candidats</span>
+        </div>
+
+        <!-- Message si aucun candidat -->
+        <div th:if="${#lists.isEmpty(persons)}" class="alert alert-info text-center">
+            <h4>Aucun candidat trouvé</h4>
+            <p>Commencez par ajouter des candidats à votre base de données ou ajustez vos filtres.</p>
+        </div>
+
+        <!-- Liste des candidats -->
+        <div th:each="person : ${persons}" class="card candidate-card mb-3" data-candidate>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-1">
+                        <div class="candidate-photo">
+                            <span th:text="${#strings.substring(person.prenom ?: '', 0, 1) + #strings.substring(person.nom ?: '', 0, 1)}">AB</span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <h5 class="card-title text-primary mb-1" th:text="${person.prenom} + ' ' + ${person.nom}">Nom Prénom</h5>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            <span th:text="${person.adresse ?: 'Adresse non renseignée'}">Adresse</span>
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-birthday-cake me-1"></i>
+                            <span th:text="${ages[person.id]} + ' ans'">Age</span>
+                            <span th:if="${person.naissance == null}">Âge non renseigné</span>
+                            
+                            <i class="fas fa-phone me-1 ms-3"></i>
+                            <span th:text="${person.contact ?: 'Non renseigné'}">Contact</span>
+                        </p>
+                        <div class="candidate-tags">
+                            <span class="info-badge">
+                                <i class="fas fa-graduation-cap me-1"></i>Bac+5
+                            </span>
+                            <span class="info-badge">
+                                <i class="fas fa-briefcase me-1"></i>5 ans exp.
+                            </span>
+                            <span class="info-badge">
+                                <i class="fas fa-code me-1"></i>Développeur
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <div class="match-score" 
+                                 th:classappend="${matchingScores[person.id] >= 80} ? 'match-high' : (${matchingScores[person.id] >= 60} ? 'match-medium' : 'match-low')"
+                                 th:text="${matchingScores[person.id]} + '%'">0%</div>
+                            <small class="text-muted">CV Matching</small>
+                            <div class="progress mt-2">
+                                <div class="progress-bar" 
+                                     th:classappend="${matchingScores[person.id] >= 80} ? 'bg-success' : (${matchingScores[person.id] >= 60} ? 'bg-warning' : 'bg-danger')"
+                                     role="progressbar" 
+                                     th:style="'width: ' + ${matchingScores[person.id]} + '%'"></div>
+                            </div>
+                            <div class="mt-2">
+                                <small th:classappend="${matchingScores[person.id] >= 80} ? 'match-high' : (${matchingScores[person.id] >= 60} ? 'match-medium' : 'match-low')">
+                                    <i th:classappend="${matchingScores[person.id] >= 80} ? 'fas fa-check-circle' : (${matchingScores[person.id] >= 60} ? 'fas fa-exclamation-circle' : 'fas fa-times-circle')" class="me-1"></i>
+                                    <span th:text="${matchingScores[person.id] >= 80} ? 'Excellent match' : (${matchingScores[person.id] >= 60} ? 'Bon match' : 'Match limité')">Match</span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 text-end">
+                        <div class="btn-group-vertical">
+                            <button class="btn btn-success btn-sm mb-1" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#candidateModal"
+                                    th:data-id="${person.id}"
+                                    th:data-prenom="${person.prenom}"
+                                    th:data-nom="${person.nom}"
+                                    th:data-score="${matchingScores[person.id]}"
+                                    th:data-info="${person.fullInformation}"
+                                    onclick="showDetailsFromButton(this)">
+                                <i class="fas fa-eye"></i> Voir CV
+                            </button>
+                            <button class="btn btn-procedure btn-sm mb-1"
+                                    onclick="startRecruitmentProcess(this)"
+                                    th:data-id="${person.id}">
+                                <i class="fas fa-clipboard-list"></i> Procédure
+                            </button>
+                            <a class="btn btn-primary btn-sm mb-1" 
+                               th:if="${person.contact}"
+                               th:href="'mailto:' + ${person.contact}">
+                                <i class="fas fa-envelope"></i> Contacter
+                            </a>
+                            <button class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-star"></i> Favoris
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour les détails du candidat -->
+    <div class="modal fade" id="candidateModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Détails du candidat</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Contenu chargé dynamiquement -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-procedure" onclick="startRecruitmentProcessFromModal()">
+                        <i class="fas fa-clipboard-list me-1"></i>Lancer procédure de recrutement
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour la procédure de recrutement -->
+    <div class="modal fade" id="recruitmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Procédure de Recrutement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-user-tie me-2"></i>Candidat sélectionné</h6>
+                            <div class="info-personal">
+                                <div id="selectedCandidateInfo"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-tasks me-2"></i>Étapes du processus</h6>
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="step1">
+                                        <label class="form-check-label" for="step1">
+                                            <strong>1. Présélection CV</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="step2">
+                                        <label class="form-check-label" for="step2">
+                                            <strong>2. Entretien téléphonique</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="step3">
+                                        <label class="form-check-label" for="step3">
+                                            <strong>3. Test technique</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="step4">
+                                        <label class="form-check-label" for="step4">
+                                            <strong>4. Entretien final</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="step5">
+                                        <label class="form-check-label" for="step5">
+                                            <strong>5. Prise de références</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <label for="recruitmentNotes" class="form-label">Notes :</label>
+                                <textarea class="form-control" id="recruitmentNotes" rows="3" placeholder="Ajoutez vos commentaires..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-success" onclick="saveRecruitmentProcess()">
+                        <i class="fas fa-save me-1"></i>Sauvegarder le processus
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentCandidateId = null;
+
+        function showDetailsFromButton(button) {
+            const id = button.getAttribute('data-id');
+            const prenom = button.getAttribute('data-prenom') || '';
+            const nom = button.getAttribute('data-nom') || '';
+            const score = button.getAttribute('data-score') || '0';
+            const fullInfo = button.getAttribute('data-info') || '';
+            
+            currentCandidateId = id;
+            showDetails(id, prenom, nom, score, fullInfo);
+        }
+
+        function showDetails(id, prenom, nom, score, fullInfo) {
+            const initials = (prenom.charAt(0) || '') + (nom.charAt(0) || '');
+            const numericScore = parseInt(score);
+            const matchClass = numericScore >= 80 ? 'match-high' : (numericScore >= 60 ? 'match-medium' : 'match-low');
+            
+            document.getElementById('modalTitle').textContent = `Détails de ${prenom} ${nom}`;
+            document.getElementById('modalBody').innerHTML = `
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center mb-3">
+                            <div class="candidate-photo mx-auto" style="width: 100px; height: 100px; font-size: 2rem;">
+                                ${initials}
+                            </div>
+                            <h4 class="mt-2">${prenom} ${nom}</h4>
+                            <div class="match-score ${matchClass} fs-3">${score}%</div>
+                            <small class="text-muted">Score de correspondance</small>
+                        </div>
+                        <div class="info-personal">
+                            <h6><i class="fas fa-user me-2"></i>Informations personnelles</h6>
+                            <div class="info-item">
+                                <span class="info-label">Âge :</span>
+                                <span class="info-value">28 ans</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Localisation :</span>
+                                <span class="info-value">Paris, France</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Diplôme :</span>
+                                <span class="info-value">Master Informatique</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Expérience :</span>
+                                <span class="info-value">5 ans</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Spécialité :</span>
+                                <span class="info-value">Développement Web</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <h5><i class="fas fa-file-alt me-2"></i>CV complet :</h5>
+                        <pre class="bg-light p-3 rounded" style="white-space: pre-wrap; font-size: 0.9rem; max-height: 400px; overflow-y: auto;">${fullInfo || 'Aucune information disponible'}</pre>
+                    </div>
+                </div>
+            `;
+        }
+
+        function startRecruitmentProcess(button) {
+            const id = button.getAttribute('data-id');
+            currentCandidateId = id;
+            
+            // Simuler les informations du candidat
+            const candidateInfo = `
+                <div class="d-flex align-items-center mb-2">
+                    <div class="candidate-photo me-3" style="width: 50px; height: 50px;">
+                        JD
+                    </div>
+                    <div>
+                        <h6 class="mb-0">John Doe</h6>
+                        <small class="text-muted">Développeur Full Stack</small>
+                    </div>
+                </div>
+                <div class="info-personal">
+                    <div class="info-item">
+                        <span class="info-label">Score matching :</span>
+                        <span class="info-value text-success">85%</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Expérience :</span>
+                        <span class="info-value">5 ans</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Localisation :</span>
+                        <span class="info-value">Paris</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('selectedCandidateInfo').innerHTML = candidateInfo;
+            new bootstrap.Modal(document.getElementById('recruitmentModal')).show();
+        }
+
+        function startRecruitmentProcessFromModal() {
+            bootstrap.Modal.getInstance(document.getElementById('candidateModal')).hide();
+            setTimeout(() => {
+                startRecruitmentProcess({ getAttribute: () => currentCandidateId });
+            }, 300);
+        }
+
+        function saveRecruitmentProcess() {
+            const steps = [];
+            for (let i = 1; i <= 5; i++) {
+                if (document.getElementById(`step${i}`).checked) {
+                    steps.push(i);
+                }
+            }
+            const notes = document.getElementById('recruitmentNotes').value;
+            
+            alert(`Processus de recrutement sauvegardé !\nÉtapes complétées : ${steps.join(', ')}\nNotes : ${notes}`);
+            bootstrap.Modal.getInstance(document.getElementById('recruitmentModal')).hide();
+        }
+
+        function applyFilters() {
+            const age = document.getElementById('ageFilter').value;
+            const diploma = document.getElementById('diplomaFilter').value;
+            const experience = document.getElementById('experienceFilter').value;
+            const location = document.getElementById('locationFilter').value.toLowerCase();
+
+            const candidates = document.querySelectorAll('[data-candidate]');
+            let visibleCount = 0;
+
+            candidates.forEach(candidate => {
+                let show = true;
+
+                // Ici vous pouvez ajouter la logique de filtrage basée sur les données réelles
+                // Pour l'exemple, on montre tous les candidats
+                
+                if (show) {
+                    candidate.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    candidate.style.display = 'none';
+                }
+            });
+
+            // Mettre à jour le compteur
+            document.querySelector('.badge').textContent = `${visibleCount} candidat(s) trouvé(s)`;
+        }
+
+        function resetFilters() {
+            document.getElementById('ageFilter').value = '';
+            document.getElementById('diplomaFilter').value = '';
+            document.getElementById('experienceFilter').value = '';
+            document.getElementById('locationFilter').value = '';
+            applyFilters();
+        }
+    </script>
+</body>
+</html>
